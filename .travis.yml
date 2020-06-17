@@ -1,0 +1,20 @@
+language: php
+
+php:
+  - 7.2.11
+
+sudo: required
+
+services:
+  - mysql
+
+install:
+  - travis_retry composer install --no-interaction --no-suggest
+  - composer show --installed
+
+before_script:
+  - travis_retry composer self-update
+
+script:
+  - composer make-db-test
+  - composer test

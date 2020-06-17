@@ -1,0 +1,30 @@
+{
+    "name": "sebaperez/php-bu",
+    "description": "Free PHP framework",
+    "type": "library",
+    "authors": [
+        {
+            "name": "sebaperez",
+            "email": "sperez@est.frba.utn.edu.ar"
+        }
+    ],
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^8"
+    },
+    "scripts": {
+	"make-db-test": "mysql -uroot < test/BuTest/Sample/extra/SampleClassDB.sql",
+        "test": "phpunit --configuration test/phpunit.xml"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bu\\": "src/Bu/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Bu\\Test\\": "test/BuTest",
+            "Bu\\Test\\Sample\\": "test/BuTest/Sample"
+        }
+    }
+}
