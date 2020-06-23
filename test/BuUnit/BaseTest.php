@@ -106,6 +106,15 @@
 			$this->assertNotNull($sampleobject);
 		}
 
+		public function test_add_composed_pk() {
+			$sampleobject = SampleClassMultiplePK::add([
+				"id1" => 6,
+				"id2" => 7,
+				"name" => "test"
+			]);
+			$this->assertNotNull($sampleobject);
+		}
+
 	}
 
 ?>

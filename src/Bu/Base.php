@@ -104,7 +104,7 @@
 				throw new \Bu\Exception\InvalidArgument("class has composed primary key - associative ids array expected");
 			} else if (self::hasSinglePK() && gettype($ids) == "array") {
 				throw new \Bu\Exception\InvalidArgument("class has a single primary key - ids not expected as array");
-			} else if (self::hasComposedPK() && ! self::arraysAreEqualsUnSorted($ids, self::getPK())) {
+			} else if (self::hasComposedPK() && ! self::arraysAreEqualsUnSorted(array_keys($ids), self::getPK())) {
 				throw new \Bu\Exception\InvalidArgument("missing or invalid PKs");
 			}
 

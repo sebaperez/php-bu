@@ -58,6 +58,8 @@
                        if ($result->num_rows === 1) {
                            return $result->fetch_assoc();
                        }
+                    } else {
+                        throw new \Bu\Exception\DBStatementError($st->error); 
                     }
                 } else {
                     throw new \Bu\Exception\DBStatementError($conex->error);
@@ -97,7 +99,7 @@
                        if ($result->num_rows === 1) {
                            return $result->fetch_assoc();
                        }
-                   } 
+                   }
                 } else {
                     throw new \Bu\Exception\DBStatementError($conex->error);
                 }
