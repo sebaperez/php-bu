@@ -8,6 +8,13 @@
 
 	class BaseTest extends BuTest {
 
+		public function test_arraysAreEqualsUnSorted() {
+			$this->assertTrue(\Bu\Base::arraysAreEqualsUnSorted(["test1", "test2"], ["test1", "test2"]));
+			$this->assertTrue(\Bu\Base::arraysAreEqualsUnSorted(["test2", "test1"], ["test1", "test2"]));
+
+			$this->assertFalse(\Bu\Base::arraysAreEqualsUnSorted(["test1", "test2"], ["test1", "test2", "test3"]));
+		}
+
 		public function test_get_table_name() {
 			$this->assertEquals("sampleclass", SampleClass::getTable());
 		}
@@ -72,6 +79,31 @@
 		public function test_get_object_values() {
 			$sampleobject = SampleClass::get(1);
 			$this->assertNotNull($sampleobject->getValues());
+		}
+
+		public function test_add_missing_value() {
+			$this->expectException(\Bu\Exception\InvalidArgument::class);
+			$sampleobject = SampleClass::add([]);
+		}
+
+		public function test_get_mandatory_fields() {
+			$fields = SampleClass::getMandatoryFields();
+			$this->assertEquals($fields, [ "name" ]);
+		}
+
+		public function test_add_invalid_value() {
+			$this->expectException(\Bu\Exception\InvalidArgument::class);
+			$sampleobject = SampleClass::add([ "name" => "test", "test" => 1 ]);
+		}
+
+		public function test_add_single_pk_cannot_be_set() {
+			$this->expectException(\Bu\Exception\InvalidArgument::class);
+			$sampleobject = SampleClass::add([ "name" => "test", "sampleclass_id" => 1 ]);
+		}
+
+		public function test_single_add() {
+			$sampleobject = SampleClass::add([ "name" => "test" ]);
+			$this->assertNotNull($sampleobject);
 		}
 
 	}

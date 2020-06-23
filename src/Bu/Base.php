@@ -24,6 +24,7 @@
 		// Field attributes
 
 		public static function ATTR_AUTO_INCREMENT() { return 1; }
+		public static function ATTR_OPTIONAL() { return 2; }
 
 		// Class attributes
 
@@ -75,6 +76,19 @@
 			return ! self::hasSinglePK();
 		}
 
+		public static function getMandatoryFields() {
+			$fields = self::getFields();
+			$r = [];
+			foreach ($fields as $fieldName => $values) {
+				if (! isset($values["attr"])) {
+					array_push($r, $fieldName);
+				} else if (isset($values["attr"]) && ($values["attr"] & self::ATTR_OPTIONAL())) {
+					array_push($r, $fieldName);
+				}
+			}
+			return $r;
+		}
+
 		public function __construct($data) {
 			$this->values = $data["values"];
 		}
@@ -104,6 +118,25 @@
 				return new $class([ "values" => $values ]);
 			} else {
 				throw new \Bu\Exception\InvalidObject();
+			}
+		}
+
+		public static function add($values) {
+			if (! $values) {
+				throw new \Bu\Exception\InvalidArgument("values not defined for Bu::add");
+			} else if (! self::arraysAreEqualsUnsorted(self::getMandatoryFields(), array_keys($values))) {
+				throw new \Bu\Exception\InvalidArgument("Bu::add missing or invalid fields: " . implode(", ", self::getDiffArrayKeys(self::getMandatoryFields(), array_keys($values))));
+			} else if (self::hasSinglePK() && in_array(self::getPK()[0], array_keys($values))) {
+				throw new \Bu\Exception\InvalidArgument("PK cannot be set in Bu::add");
+			}
+
+			$class = get_called_class();
+			$ids = BuDB::addNewObject($class, $values);
+
+			if ($ids) {
+				return $class::get($ids);
+			} else {
+				throw new \Bu\Exception\ErrorOnAdd();
 			}
 		}
 

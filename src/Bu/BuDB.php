@@ -24,6 +24,48 @@
             return $conex;
         }
 
+        public static function addNewObject($class, $values) {
+            $table = $class::getTable();
+            $query = "insert into $table (" . implode(",", array_keys($values)) . ") values (" . implode(",", array_fill(0, count(array_keys($values)), "?")) . ")";
+            
+            $parsedValues = [];
+            $querySymbols = [];
+
+            foreach ($values as $key => $value) {
+                $symbol = $class::getFieldSymbol($key);
+                array_push($parsedValues, $value);
+                array_push($querySymbols, $symbol);
+            }
+
+            $conex = self::getConex();
+            if ($conex) {
+                $st = $conex->prepare($query);
+                if ($st) {
+                   $st->bind_param(implode("", $querySymbols), ...$parsedValues);
+                   if ($st->execute()) {
+                       if ($class::hasSinglePK()) {
+                           return $conex->insert_id;
+                       } else {
+                            $pks = $class::getPK();
+                            $r = [];
+                            foreach ($pks as $pk) {
+                                $r[$pk] = $values[$pk];
+                            }
+                            return $r;
+                       }
+                       
+                       $result = $st->get_result();
+                       if ($result->num_rows === 1) {
+                           return $result->fetch_assoc();
+                       }
+                    }
+                } else {
+                    throw new \Bu\Exception\DBStatementError($conex->error);
+                }
+            }
+            return false;
+        }
+
         public static function getValuesSingleObject($class, $ids) {
             $fieldNames = $class::getFieldNames();
             $parsedFields = implode(",", $fieldNames);
