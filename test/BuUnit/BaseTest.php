@@ -36,6 +36,11 @@
 			$this->assertEquals($fieldsName, [ "sampleclass_id", "name" ]);
 		}
 
+		public function test_is_valid_field() {
+			$this->assertTrue(SampleClass::isField("name"));
+			$this->assertFalse(SampleClass::isField("name1"));
+		}
+
 		public function test_get_field_type() {
 			$this->assertEquals(\Bu\Base::TYPE_INT(), SampleClass::getFieldType("sampleclass_id"));
 			$this->assertEquals(\Bu\Base::TYPE_STRING(), SampleClass::getFieldType("name"));
@@ -102,17 +107,26 @@
 		}
 
 		public function test_single_add() {
-			$sampleobject = SampleClass::add([ "name" => "test" ]);
+			$NAME = "test";
+			$sampleobject = SampleClass::add([ "name" => $NAME ]);
 			$this->assertNotNull($sampleobject);
+			$this->assertEquals($NAME, $sampleobject->getValue("name"));
 		}
 
 		public function test_add_composed_pk() {
-			$sampleobject = SampleClassMultiplePK::add([
-				"id1" => 6,
-				"id2" => 7,
-				"name" => "test"
+			$NAME = "testcomposed";
+			$sampleobject1 = SampleClass::add([ "name" => "test" ]);
+			$sampleobject2 = SampleClass::add([ "name" => "test" ]);
+			$sampleclassmultiplepk = SampleClassMultiplePK::add([
+				"id1" => $sampleobject1->getValue("sampleclass_id"),
+				"id2" => $sampleobject2->getValue("sampleclass_id"),
+				"name" => $NAME
 			]);
-			$this->assertNotNull($sampleobject);
+			$this->assertNotNull($sampleclassmultiplepk);
+			$this->assertEquals($NAME, $sampleclassmultiplepk->getValue("name"));
+			$this->assertEquals($sampleobject1->getValue("sampleclass_id"), $sampleclassmultiplepk->getValue("id1"));
+			$this->assertEquals($sampleobject2->getValue("sampleclass_id"), $sampleclassmultiplepk->getValue("id2"));
+			
 		}
 
 	}

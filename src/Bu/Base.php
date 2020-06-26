@@ -68,6 +68,10 @@
 			return array_keys(self::getFields());
 		}
 
+		public static function isField($field) {
+			return in_array($field, self::getFieldNames());
+		}
+
 		public static function hasSinglePK() {
 			return count(self::getPK()) === 1;
 		}
@@ -95,6 +99,14 @@
 
 		public function getValues() {
 			return $this->values;
+		}
+
+		public function getValue($field) {
+			if (self::isField($field)) {
+				return $this->getValues()[$field];
+			} else {
+				throw new \Bu\Exception\InvalidArgument("$field is not a valif field for " . get_called_class());
+			}
 		}
 
 		public static function get($ids = null) {
