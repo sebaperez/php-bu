@@ -133,7 +133,7 @@
 			}
 		}
 
-		public static function add($values) {
+		public static function add($values = null) {
 			if (! $values) {
 				throw new \Bu\Exception\InvalidArgument("values not defined for Bu::add");
 			} else if (! self::arraysAreEqualsUnsorted(self::getMandatoryFields(), array_keys($values))) {
@@ -150,6 +150,31 @@
 			} else {
 				throw new \Bu\Exception\ErrorOnAdd();
 			}
+		}
+
+		public function update($field = null, $value = null) {
+			if (! $field || ! $value) {
+				throw new \Bu\Exception\InvalidArgument("values not defined for Bu::update");
+			} else if (! self::isField($field)) {
+				throw new \Bu\Exception\InvalidArgument("field $field does not exist for Bu::update");
+			}
+
+			$class = get_called_class();
+			$pks = self::getPK();
+			$ids = [];
+			foreach ($pks as $pk) {
+				$ids[$pk] = $this->getValue($pk);
+			}
+
+			$result = BuDB::update($class, $ids, $field, $value);
+			if ($result) {
+				return $this->_setValue($field, $value);
+			}
+			return false;
+		}
+
+		public function _setValue($field, $value) {
+			return (bool)($this->values[$field] = $value);
 		}
 
 	}

@@ -68,6 +68,37 @@
             return false;
         }
 
+        public static function update($class, $ids, $field, $value) {
+            $table = $class::getTable();
+
+            $query = "update $table set $field = ? where ";
+            $conditions = [];
+            $parsedValues = [ $value ];
+            $querySymbols = [ $class::getFieldSymbol($field) ];
+
+            foreach ($ids as $pk => $pkValue) {
+                array_push($conditions, "$pk = ?");
+                $symbol = $class::getFieldSymbol($pk);
+                array_push($querySymbols, $symbol);
+                array_push($parsedValues, $pkValue);
+            }
+            $query .= implode(" and ", $conditions);
+            $conex = self::getConex();
+            if ($conex) {
+                $st = $conex->prepare($query);
+                if ($st) {
+                    $st->bind_param(implode("", $querySymbols), ...$parsedValues);
+                    if ($st->execute()) {
+                        return ($st->affected_rows === 1);
+                    }
+                } else {
+                    throw new \Bu\Exception\DBStatementError($conex->error);
+                }
+            }
+
+            return false;
+        }
+
         public static function getValuesSingleObject($class, $ids) {
             $fieldNames = $class::getFieldNames();
             $parsedFields = implode(",", $fieldNames);

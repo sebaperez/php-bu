@@ -129,6 +129,40 @@
 			
 		}
 
+		public function test_set_value() {
+			$sampleobject1 = SampleClass::add([ "name" => "test" ]);
+			$NEWNAME = "test2";
+			$this->assertTrue($sampleobject1->_setValue("name", $NEWNAME));
+			$this->assertEquals($NEWNAME, $sampleobject1->getValue("name"));
+		}
+
+		public function test_update_field() {
+			$sampleobject1 = SampleClass::add([ "name" => "test" ]);
+			$NEWNAME = "test2";
+			$this->assertTrue($sampleobject1->update("name", $NEWNAME));
+			$this->assertEquals($NEWNAME, $sampleobject1->getValue("name"));
+			$_sampleobject1 = SampleClass::get($sampleobject1->getValue("sampleclass_id"));
+			$this->assertEquals($NEWNAME, $_sampleobject1->getValue("name"));
+		}
+
+		public function test_update_invalid_field() {
+			$sampleobject = SampleClass::add([ "name" => "test" ]);
+			$this->expectException(\Bu\Exception\InvalidArgument::class);
+			$sampleobject->update("test", 1);
+		}
+
+		public function test_update_without_field() {
+			$sampleobject = SampleClass::add([ "name" => "test" ]);
+			$this->expectException(\Bu\Exception\InvalidArgument::class);
+			$sampleobject->update(null, 1);
+		}
+
+		public function test_update_without_value() {
+			$sampleobject = SampleClass::add([ "name" => "test" ]);
+			$this->expectException(\Bu\Exception\InvalidArgument::class);
+			$sampleobject->update("name");
+		}
+
 	}
 
 ?>
