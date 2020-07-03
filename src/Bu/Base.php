@@ -52,7 +52,25 @@
 			return self::getField($field)["type"];
 		}
 
+		public static function getCommonFieldSymbols() {
+			return [
+				"start_date" => "s",
+				"end_date" => "s"
+			];
+		}
+
+		public static function isCommonField($field) {
+			return isset(self::getCommonFieldSymbols()[$field]);
+		}
+
+		public static function getCommonFieldSymbol($field) {
+			return self::getCommonFieldSymbols()[$field];
+		}
+
 		public static function getFieldSymbol($field) {
+			if (self::isCommonField($field)) {
+				return self::getCommonFieldSymbol($field);
+			}
 			return self::getSymbolByType(self::getFieldType($field));
 		}
 
@@ -65,7 +83,14 @@
 		}
 
 		public static function getFieldNames() {
-			return array_keys(self::getFields());
+			$fields = array_keys(self::getFields());
+			if (self::hasStartDate()) {
+				array_push($fields, "start_date");
+			}
+			if (self::hasEndDate()) {
+				array_push($fields, "end_date");
+			}
+			return $fields;
 		}
 
 		public static function isField($field) {
@@ -78,6 +103,18 @@
 
 		public static function hasComposedPK() {
 			return ! self::hasSinglePK();
+		}
+
+		public static function getAttr() {
+			return self::getDef()["attr"];
+		}
+
+		public static function hasStartDate() {
+			return in_array(self::ATTR_WITH_START_DATE(), self::getAttr());
+		}
+
+		public static function hasEndDate() {
+			return in_array(self::ATTR_WITH_END_DATE(), self::getAttr());
 		}
 
 		public static function getMandatoryFields() {
@@ -102,10 +139,10 @@
 		}
 
 		public function getValue($field) {
-			if (self::isField($field)) {
+			if (self::isField($field) || (self::hasEndDate() && $field == "end_date") || (self::hasStartDate() && $field == "start_date")) {
 				return $this->getValues()[$field];
 			} else {
-				throw new \Bu\Exception\InvalidArgument("$field is not a valif field for " . get_called_class());
+				throw new \Bu\Exception\InvalidArgument("$field is not a valid field for " . get_called_class());
 			}
 		}
 
@@ -133,6 +170,10 @@
 			}
 		}
 
+		public static function getTime() {
+			return date("Y-m-d H:i:s");
+		}
+
 		public static function add($values = null) {
 			if (! $values) {
 				throw new \Bu\Exception\InvalidArgument("values not defined for Bu::add");
@@ -143,6 +184,9 @@
 			}
 
 			$class = get_called_class();
+			if (self::hasStartDate()) {
+				$values["start_date"] = self::getTime();
+			}
 			$ids = BuDB::addNewObject($class, $values);
 
 			if ($ids) {
@@ -171,6 +215,19 @@
 				return $this->_setValue($field, $value);
 			}
 			return false;
+		}
+
+		public function isDeleted() {
+			return (bool)($this->getValue("end_date"));
+		}
+
+		public function delete() {
+			if (! self::hasEndDate()) {
+				throw new \Bu\Exception\InvalidStatus("$class cannot be deleted");
+			} else if ($this->isDeleted()) {
+				throw new \Bu\Exception\InvalidStatus("object from $class is already deleted");
+			}
+			return $this->update("end_date", self::getTime());
 		}
 
 		public function _setValue($field, $value) {

@@ -33,7 +33,7 @@
 		public function test_get_fields_names() {
 			$fieldsName = SampleClass::getFieldNames();
 			$this->assertIsArray($fieldsName);
-			$this->assertEquals($fieldsName, [ "sampleclass_id", "name" ]);
+			$this->assertEquals($fieldsName, [ "sampleclass_id", "name", "start_date", "end_date" ]);
 		}
 
 		public function test_is_valid_field() {
@@ -107,14 +107,14 @@
 		}
 
 		public function test_single_add() {
-			$NAME = "test";
+			$NAME = $this->getRandomString();
 			$sampleobject = SampleClass::add([ "name" => $NAME ]);
 			$this->assertNotNull($sampleobject);
 			$this->assertEquals($NAME, $sampleobject->getValue("name"));
 		}
 
 		public function test_add_composed_pk() {
-			$NAME = "testcomposed";
+			$NAME = $this->getRandomString();
 			$sampleobject1 = SampleClass::add([ "name" => "test" ]);
 			$sampleobject2 = SampleClass::add([ "name" => "test" ]);
 			$sampleclassmultiplepk = SampleClassMultiplePK::add([
@@ -131,18 +131,37 @@
 
 		public function test_set_value() {
 			$sampleobject1 = SampleClass::add([ "name" => "test" ]);
-			$NEWNAME = "test2";
+			$NEWNAME = $this->getRandomString();
 			$this->assertTrue($sampleobject1->_setValue("name", $NEWNAME));
 			$this->assertEquals($NEWNAME, $sampleobject1->getValue("name"));
 		}
 
-		public function test_update_field() {
+		public function test_update_field_on_simple_pk() {
 			$sampleobject1 = SampleClass::add([ "name" => "test" ]);
-			$NEWNAME = "test2";
+			$NEWNAME = $this->getRandomString();
 			$this->assertTrue($sampleobject1->update("name", $NEWNAME));
 			$this->assertEquals($NEWNAME, $sampleobject1->getValue("name"));
 			$_sampleobject1 = SampleClass::get($sampleobject1->getValue("sampleclass_id"));
 			$this->assertEquals($NEWNAME, $_sampleobject1->getValue("name"));
+		}
+
+		public function test_update_field_on_composed_pk() {
+			$sampleobject1 = SampleClass::add([ "name" => "test" ]);
+			$sampleobject2 = SampleClass::add([ "name" => "test" ]);
+			$NAME = $this->getRandomString();
+			$samplecomposed = SampleClassMultiplePK::add([
+				"id1" => $sampleobject1->getValue("sampleclass_id"),
+				"id2" => $sampleobject2->getValue("sampleclass_id"),
+				"name" => $NAME
+			]);
+			$NEWNAME = $this->getRandomString();
+			$this->assertTrue($samplecomposed->update("name", $NEWNAME));
+			$this->assertEquals($NEWNAME, $samplecomposed->getValue("name"));
+			$_samplecomposed = SampleClassMultiplePK::get([
+				"id1" => $samplecomposed->getValue("id1"),
+				"id2" => $samplecomposed->getValue("id2"),
+			]);
+			$this->assertEquals($NEWNAME, $_samplecomposed->getValue("name"));
 		}
 
 		public function test_update_invalid_field() {
@@ -161,6 +180,24 @@
 			$sampleobject = SampleClass::add([ "name" => "test" ]);
 			$this->expectException(\Bu\Exception\InvalidArgument::class);
 			$sampleobject->update("name");
+		}
+
+		public function test_has_start_date() {
+			$this->assertTrue(SampleClass::hasStartDate());
+		}
+
+		public function test_has_end_date() {
+			$this->assertTrue(SampleClass::hasEndDate());
+		}
+
+		public function test_delete() {
+			$sampleobject = SampleClass::add([ "name" => "test" ]);
+			$this->assertFalse($sampleobject->isDeleted());
+			$this->assertTrue($sampleobject->delete());
+			$this->assertTrue($sampleobject->isDeleted());
+
+			$this->expectException(\Bu\Exception\InvalidObject::class);
+			$_sampleobject = SampleClass::get($sampleobject->getValue("sampleclass_id"));
 		}
 
 	}

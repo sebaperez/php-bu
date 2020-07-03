@@ -82,6 +82,9 @@
                 array_push($querySymbols, $symbol);
                 array_push($parsedValues, $pkValue);
             }
+            if ($class::hasEndDate()) {
+                array_push($conditions, "end_date is null");
+            }
             $query .= implode(" and ", $conditions);
             $conex = self::getConex();
             if ($conex) {
@@ -117,6 +120,9 @@
                 $value = $ids[$pk];
                 array_push($querySymbols, $symbol);
                 array_push($parsedValues, $value);
+            }
+            if ($class::hasEndDate()) {
+                array_push($conditions, "end_date is null");
             }
             $query .= implode(" and ", $conditions);
 
