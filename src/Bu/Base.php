@@ -13,11 +13,16 @@
 
 		public static function TYPE_INT() { return 1; }
 		public static function TYPE_STRING() { return 2; }
+		public static function TYPE_DATE() { return 3; }
+
+		public static function STRING_FIELD_START_DATE() { return "start_date"; }
+		public static function STRING_FIELD_END_DATE() { return "end_date"; }
 
 		public static function SYMBOLS_BY_TYPE() {
 			return [
 				self::TYPE_INT() => "i",
-				self::TYPE_STRING() => "s"
+				self::TYPE_STRING() => "s",
+				self::TYPE_DATE() => "s"
 			];
 		}
 
@@ -54,8 +59,8 @@
 
 		public static function getCommonFieldSymbols() {
 			return [
-				"start_date" => "s",
-				"end_date" => "s"
+				self::STRING_FIELD_START_DATE() => self::getSymbolByType(self::TYPE_DATE()),
+				self::STRING_FIELD_END_DATE() => self::getSymbolByType(self::TYPE_DATE())
 			];
 		}
 
@@ -85,10 +90,10 @@
 		public static function getFieldNames() {
 			$fields = array_keys(self::getFields());
 			if (self::hasStartDate()) {
-				array_push($fields, "start_date");
+				array_push($fields, self::STRING_FIELD_START_DATE());
 			}
 			if (self::hasEndDate()) {
-				array_push($fields, "end_date");
+				array_push($fields, self::STRING_FIELD_END_DATE());
 			}
 			return $fields;
 		}
@@ -134,12 +139,16 @@
 			$this->values = $data["values"];
 		}
 
+		public function getClassName() {
+			return get_called_class();
+		}
+
 		public function getValues() {
 			return $this->values;
 		}
 
 		public function getValue($field) {
-			if (self::isField($field) || (self::hasEndDate() && $field == "end_date") || (self::hasStartDate() && $field == "start_date")) {
+			if (self::isField($field) || (self::hasEndDate() && $field === self::STRING_FIELD_END_DATE()) || (self::hasStartDate() && $field === self::STRING_FIELD_START_DATE())) {
 				return $this->getValues()[$field];
 			} else {
 				throw new \Bu\Exception\InvalidArgument("$field is not a valid field for " . get_called_class());
@@ -170,6 +179,26 @@
 			}
 		}
 
+		public static function find($condition = null, $queryValues = null) {
+			if (! $condition) {
+				throw new \Bu\Exception\InvalidArgument("condition not defined for Bu::find");
+			}
+
+			$class = get_called_class();
+			$objects = [];
+			$ids = BuDB::find($class, $condition, $queryValues);
+			if ($ids) {
+				foreach ($ids as $id) {
+					array_push($objects, $class::get($id));
+				}
+			}
+			return $objects;
+		}
+
+		public static function findAll() {
+			return self::find("1 = 1");
+		}
+
 		public static function getTime() {
 			return date("Y-m-d H:i:s");
 		}
@@ -185,7 +214,7 @@
 
 			$class = get_called_class();
 			if (self::hasStartDate()) {
-				$values["start_date"] = self::getTime();
+				$values[self::STRING_FIELD_START_DATE()] = self::getTime();
 			}
 			$ids = BuDB::addNewObject($class, $values);
 
@@ -218,7 +247,7 @@
 		}
 
 		public function isDeleted() {
-			return (bool)($this->getValue("end_date"));
+			return (bool)($this->getValue(self::STRING_FIELD_END_DATE()));
 		}
 
 		public function delete() {
@@ -227,7 +256,7 @@
 			} else if ($this->isDeleted()) {
 				throw new \Bu\Exception\InvalidStatus("object from $class is already deleted");
 			}
-			return $this->update("end_date", self::getTime());
+			return $this->update(self::STRING_FIELD_END_DATE(), self::getTime());
 		}
 
 		public function _setValue($field, $value) {
@@ -235,4 +264,3 @@
 		}
 
 	}
-?>
