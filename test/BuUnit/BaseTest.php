@@ -292,4 +292,15 @@ class BaseTest extends \Bu\Test\BuTest
 			$this->assertEquals($sampleobject->getClassName(), $object->getClassName());
 		}
 	}
+
+	public function test_get_fk_object() {
+		$sampleobject1 = $this->getNew("SampleClass");
+		$sampleobject2 = $this->getNew("SampleClass");
+		$sampleclassmultiplepk = $this->getNew("SampleClassMultiplePK", [
+			"id1" => $sampleobject1->getValue("sampleclass_id"),
+			"id2" => $sampleobject2->getValue("sampleclass_id")
+		]);
+		$this->assertEquals($sampleclassmultiplepk->getObject("id1")->getValue("sampleclass_id"), $sampleobject1->getValue("sampleclass_id"));
+		$this->assertEquals($sampleclassmultiplepk->getObject("id2")->getValue("sampleclass_id"), $sampleobject2->getValue("sampleclass_id"));
+	}
 }

@@ -57,6 +57,18 @@
 			return self::getField($field)["type"];
 		}
 
+		public static function isFieldFK($field) {
+			return isset(self::getField($field)["fk"]);
+		}
+
+		public static function getFieldFK($field) {
+			return self::getField($field)["fk"];
+		}
+
+		public static function getFieldFKClass($field) {
+			return self::getFieldFK($field)["class"];
+		}
+
 		public static function getCommonFieldSymbols() {
 			return [
 				self::STRING_FIELD_START_DATE() => self::getSymbolByType(self::TYPE_DATE()),
@@ -261,6 +273,11 @@
 
 		public function _setValue($field, $value) {
 			return (bool)($this->values[$field] = $value);
+		}
+
+		public function getObject($field) {
+			$class = self::getFieldFKClass($field);
+			return $class::get($this->getValue($field));
 		}
 
 	}
