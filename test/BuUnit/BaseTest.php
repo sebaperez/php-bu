@@ -102,7 +102,8 @@ class BaseTest extends \Bu\Test\BuTest
 
 	public function test_get_object_values()
 	{
-		$sampleobject = \Bu\Test\Sample\SampleClass::get(1);
+		$_sampleobject = $this->getNew("SampleClass");
+		$sampleobject = \Bu\Test\Sample\SampleClass::get($_sampleobject->getValue("sampleclass_id"));
 		$this->assertNotNull($sampleobject->getValues());
 	}
 
@@ -141,9 +142,9 @@ class BaseTest extends \Bu\Test\BuTest
 	public function test_add_composed_pk()
 	{
 		$NAME = $this->getRandomString();
-		$sampleobject1 = \Bu\Test\Sample\SampleClass::add(["name" => "test"]);
-		$sampleobject2 = \Bu\Test\Sample\SampleClass::add(["name" => "test"]);
-		$sampleclassmultiplepk = \Bu\Test\Sample\SampleClassMultiplePK::add([
+		$sampleobject1 = $this->getNew("SampleClass");
+		$sampleobject2 = $this->getNew("SampleClass");
+		$sampleclassmultiplepk = $this->getNew("SampleClassMultiplePK", [
 			"id1" => $sampleobject1->getValue("sampleclass_id"),
 			"id2" => $sampleobject2->getValue("sampleclass_id"),
 			"name" => $NAME
@@ -156,59 +157,59 @@ class BaseTest extends \Bu\Test\BuTest
 
 	public function test_set_value()
 	{
-		$sampleobject1 = \Bu\Test\Sample\SampleClass::add(["name" => "test"]);
+		$sampleobject = $this->getNew("SampleClass");
 		$NEWNAME = $this->getRandomString();
-		$this->assertTrue($sampleobject1->_setValue("name", $NEWNAME));
-		$this->assertEquals($NEWNAME, $sampleobject1->getValue("name"));
+		$this->assertTrue($sampleobject->_setValue("name", $NEWNAME));
+		$this->assertEquals($NEWNAME, $sampleobject->getValue("name"));
 	}
 
 	public function test_update_field_on_simple_pk()
 	{
-		$sampleobject1 = \Bu\Test\Sample\SampleClass::add(["name" => "test"]);
+		$sampleobject = $this->getNew("SampleClass");
 		$NEWNAME = $this->getRandomString();
-		$this->assertTrue($sampleobject1->update("name", $NEWNAME));
-		$this->assertEquals($NEWNAME, $sampleobject1->getValue("name"));
-		$_sampleobject1 = \Bu\Test\Sample\SampleClass::get($sampleobject1->getValue("sampleclass_id"));
-		$this->assertEquals($NEWNAME, $_sampleobject1->getValue("name"));
+		$this->assertTrue($sampleobject->update("name", $NEWNAME));
+		$this->assertEquals($NEWNAME, $sampleobject->getValue("name"));
+		$_sampleobject = \Bu\Test\Sample\SampleClass::get($sampleobject->getValue("sampleclass_id"));
+		$this->assertEquals($NEWNAME, $_sampleobject->getValue("name"));
 	}
 
 	public function test_update_field_on_composed_pk()
 	{
-		$sampleobject1 = \Bu\Test\Sample\SampleClass::add(["name" => "test"]);
-		$sampleobject2 = \Bu\Test\Sample\SampleClass::add(["name" => "test"]);
+		$sampleobject1 = $this->getNew("SampleClass");
+		$sampleobject2 = $this->getNew("SampleClass");
 		$NAME = $this->getRandomString();
-		$samplecomposed = \Bu\Test\Sample\SampleClassMultiplePK::add([
+		$sampleclassmultiplepk = $this->getNew("SampleClassMultiplePK", [
 			"id1" => $sampleobject1->getValue("sampleclass_id"),
 			"id2" => $sampleobject2->getValue("sampleclass_id"),
 			"name" => $NAME
 		]);
 		$NEWNAME = $this->getRandomString();
-		$this->assertTrue($samplecomposed->update("name", $NEWNAME));
-		$this->assertEquals($NEWNAME, $samplecomposed->getValue("name"));
-		$_samplecomposed = \Bu\Test\Sample\SampleClassMultiplePK::get([
-			"id1" => $samplecomposed->getValue("id1"),
-			"id2" => $samplecomposed->getValue("id2"),
+		$this->assertTrue($sampleclassmultiplepk->update("name", $NEWNAME));
+		$this->assertEquals($NEWNAME, $sampleclassmultiplepk->getValue("name"));
+		$_sampleclassmultiplepk = \Bu\Test\Sample\SampleClassMultiplePK::get([
+			"id1" => $sampleclassmultiplepk->getValue("id1"),
+			"id2" => $sampleclassmultiplepk->getValue("id2"),
 		]);
-		$this->assertEquals($NEWNAME, $_samplecomposed->getValue("name"));
+		$this->assertEquals($NEWNAME, $_sampleclassmultiplepk->getValue("name"));
 	}
 
 	public function test_update_invalid_field()
 	{
-		$sampleobject = \Bu\Test\Sample\SampleClass::add(["name" => "test"]);
+		$sampleobject = $this->getNew("SampleClass");
 		$this->expectException(\Bu\Exception\InvalidArgument::class);
 		$sampleobject->update("test", 1);
 	}
 
 	public function test_update_without_field()
 	{
-		$sampleobject = \Bu\Test\Sample\SampleClass::add(["name" => "test"]);
+		$sampleobject = $this->getNew("SampleClass");
 		$this->expectException(\Bu\Exception\InvalidArgument::class);
 		$sampleobject->update(null, 1);
 	}
 
 	public function test_update_without_value()
 	{
-		$sampleobject = \Bu\Test\Sample\SampleClass::add(["name" => "test"]);
+		$sampleobject = $this->getNew("SampleClass");
 		$this->expectException(\Bu\Exception\InvalidArgument::class);
 		$sampleobject->update("name");
 	}
@@ -225,7 +226,7 @@ class BaseTest extends \Bu\Test\BuTest
 
 	public function test_delete()
 	{
-		$sampleobject = \Bu\Test\Sample\SampleClass::add(["name" => "test"]);
+		$sampleobject = $this->getNew("SampleClass");
 		$this->assertFalse($sampleobject->isDeleted());
 		$this->assertTrue($sampleobject->delete());
 		$this->assertTrue($sampleobject->isDeleted());
@@ -237,7 +238,7 @@ class BaseTest extends \Bu\Test\BuTest
 	public function test_find()
 	{
 		$NAME = "test";
-		$sampleobject = \Bu\Test\Sample\SampleClass::add(["name" => $NAME]);
+		$sampleobject = $this->getNew("SampleClass", [ "name" => $NAME ]);
 		$objects = \Bu\Test\Sample\SampleClass::find("name = ?", ["name" => $NAME]);
 		$this->assertTrue(count($objects) >= 1);
 		$flag = false;
@@ -253,7 +254,7 @@ class BaseTest extends \Bu\Test\BuTest
 	public function test_find_exclude_end_date()
 	{
 		$NAME = "test";
-		$sampleobject = \Bu\Test\Sample\SampleClass::add(["name" => $NAME]);
+		$sampleobject = $this->getNew("SampleClass", [ "name" => $NAME ]);
 		$this->assertTrue($sampleobject->delete());
 		$objects = \Bu\Test\Sample\SampleClass::find("name = ?", ["name" => $NAME]);
 		$flag = false;

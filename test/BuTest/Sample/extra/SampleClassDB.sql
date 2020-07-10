@@ -17,5 +17,3 @@ create table if not exists sampleclassmultiplepk (
         end_date datetime,
         primary key(id1, id2)
 );
-
-insert into sampleclass (name, start_date) values ("test", now());

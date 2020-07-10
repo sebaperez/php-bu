@@ -10,7 +10,9 @@ trait Factory
     public function tearDown(): void
     {
         foreach ($this->_factoryObjects as $object) {
-            $object->delete();
+            if (! $object->isDeleted()) {
+                $object->delete();
+            }
         }
     }
 
@@ -72,8 +74,10 @@ trait Factory
 
     public function hasPreObjectPredefinedKey($class, $params)
     {
-        if (isset($this->getPreObjectsDefinition()[$class]["key"])) {
-            return isset($params[$this->getPreObjectsDefinition()[$class]["key"]]);
+        $def = $this->getPreObjectsDefinition()[$class];
+        $required = $def["key"];
+        if (isset($def["key"])) {
+            return (count(array_intersect_key(array_flip($required), $params)) === count($required));
         }
     }
 
