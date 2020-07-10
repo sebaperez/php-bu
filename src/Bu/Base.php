@@ -280,4 +280,20 @@
 			return $class::get($this->getValue($field));
 		}
 
+		public function findObjects($class) {
+			$fields = $class::getFields();
+			$fk_fields = [];
+			$r = [];
+			foreach ($fields as $field => $fieldDef) {
+				if (isset($fieldDef["fk"]) && $fieldDef["fk"]["class"] == get_called_class()) {
+					array_push($fk_fields, $field);
+				}
+			}
+			foreach ($fk_fields as $field) {
+				$_r = $class::find("$field = ?", [ $field => $this->getValue($this->getPK()[0]) ]);
+				$r = array_merge($r, $_r);
+			}
+			return $r;
+		}
+
 	}

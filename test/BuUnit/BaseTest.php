@@ -303,4 +303,30 @@ class BaseTest extends \Bu\Test\BuTest
 		$this->assertEquals($sampleclassmultiplepk->getObject("id1")->getValue("sampleclass_id"), $sampleobject1->getValue("sampleclass_id"));
 		$this->assertEquals($sampleclassmultiplepk->getObject("id2")->getValue("sampleclass_id"), $sampleobject2->getValue("sampleclass_id"));
 	}
+
+	public function test_find_objects() {
+		$sampleobject1 = $this->getNew("SampleClass");
+		$sampleobject2 = $this->getNew("SampleClass");
+		$sampleobject3 = $this->getNew("SampleClass");
+		$sampleclassmultiplepk1 = $this->getNew("SampleClassMultiplePK", [
+			"id1" => $sampleobject1->getValue("sampleclass_id"),
+			"id2" => $sampleobject2->getValue("sampleclass_id")
+		]);
+		$sampleclassmultiplepk2 = $this->getNew("SampleClassMultiplePK", [
+			"id1" => $sampleobject1->getValue("sampleclass_id"),
+			"id2" => $sampleobject3->getValue("sampleclass_id")
+		]);
+
+		$objects = $sampleobject1->findObjects("\Bu\Test\Sample\SampleClassMultiplePK");
+		$this->assertNotEmpty($objects);
+		$this->assertCount(2, $objects);
+
+		$this->assertEquals($objects[0]->getValue("id1"), $sampleobject1->getValue("sampleclass_id"));
+		$this->assertEquals($objects[0]->getValue("id2"), $sampleobject2->getValue("sampleclass_id"));
+
+		$this->assertEquals($objects[1]->getValue("id1"), $sampleobject1->getValue("sampleclass_id"));
+		$this->assertEquals($objects[1]->getValue("id2"), $sampleobject3->getValue("sampleclass_id"));
+		
+	}
+
 }

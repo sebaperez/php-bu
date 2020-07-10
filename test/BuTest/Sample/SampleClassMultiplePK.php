@@ -13,13 +13,13 @@
 					"id1" => [
 						"type" => self::TYPE_INT(),
 						"fk" => [
-							"class" => "\Bu\Test\Sample\SampleClass"
+							"class" => "Bu\Test\Sample\SampleClass"
 						]
 					],
 					"id2" => [
 						"type" => self::TYPE_INT(),
 						"fk" => [
-							"class" => "\Bu\Test\Sample\SampleClass"
+							"class" => "Bu\Test\Sample\SampleClass"
 						]
 					],
 					"name" => [
