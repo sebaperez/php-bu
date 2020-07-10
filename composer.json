@@ -24,7 +24,8 @@
     "autoload-dev": {
         "psr-4": {
             "Bu\\Test\\": "test/BuTest",
-            "Bu\\Test\\Sample\\": "test/BuTest/Sample"
+            "Bu\\Test\\Sample\\": "test/BuTest/Sample",
+            "Bu\\BuUnit\\": "test/BuUnit"
         }
     }
 }

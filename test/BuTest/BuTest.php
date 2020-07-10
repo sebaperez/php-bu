@@ -5,7 +5,9 @@
 	use PHPUnit\Framework\TestCase;
 
 	class BuTest extends TestCase {
-	
+
+		use \Bu\Test\Factory;
+
 		public function getRandomInt($lower = 0, $greater = 100) {
 			return random_int($lower, $greater);
 		}   
