@@ -36,6 +36,8 @@
 		public static function ATTR_WITH_START_DATE() { return 1; }
 		public static function ATTR_WITH_END_DATE() { return 2; }
 
+		// Validation errors
+		public static function VALIDATE_ERROR_MISSING_FIELD() { return "ERROR_MISSING_FIELD"; }
 
 		public static function getDef() {
 			return get_called_class()::DEF();
@@ -213,6 +215,19 @@
 
 		public static function getTime() {
 			return date("Y-m-d H:i:s");
+		}
+
+		public static function validate($values = []) {
+			$response = [];
+
+			$mandatoryFields = self::getMandatoryFields();
+			foreach ($mandatoryFields as $mandatoryField) {
+				if (! in_array($mandatoryField, array_keys($values))) {
+					$response[$mandatoryField] = [ "error" => self::VALIDATE_ERROR_MISSING_FIELD() ];
+				}
+			}
+
+			return $response;
 		}
 
 		public static function add($values = null) {

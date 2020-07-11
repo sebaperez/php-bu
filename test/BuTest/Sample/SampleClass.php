@@ -14,14 +14,18 @@ class SampleClass extends Base
 			"fields" => [
 				"sampleclass_id" => [
 					"type" => self::TYPE_INT(),
-					"attr" => self::ATTR_AUTO_INCREMENT()
+					"attr" => [ self::ATTR_AUTO_INCREMENT() ]
 				],
 				"name" => [
 					"type" => self::TYPE_STRING()
+				],
+				"optional" => [
+					"type" => self::TYPE_STRING(),
+					"attr" => [ self::ATTR_OPTIONAL() ]
 				]
 			],
 			"pk" => ["sampleclass_id"],
-			"attr" => [self::ATTR_WITH_START_DATE(), self::ATTR_WITH_END_DATE()]
+			"attr" => [ self::ATTR_WITH_START_DATE(), self::ATTR_WITH_END_DATE() ]
 		];
 	}
 }

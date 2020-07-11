@@ -43,7 +43,7 @@ class BaseTest extends \Bu\Test\BuTest
 	{
 		$fieldsName = \Bu\Test\Sample\SampleClass::getFieldNames();
 		$this->assertIsArray($fieldsName);
-		$this->assertEquals($fieldsName, ["sampleclass_id", "name", "start_date", "end_date"]);
+		$this->assertEquals($fieldsName, ["sampleclass_id", "name", "optional", "start_date", "end_date"]);
 	}
 
 	public function test_is_valid_field()
@@ -327,6 +327,15 @@ class BaseTest extends \Bu\Test\BuTest
 		$this->assertEquals($objects[1]->getValue("id1"), $sampleobject1->getValue("sampleclass_id"));
 		$this->assertEquals($objects[1]->getValue("id2"), $sampleobject3->getValue("sampleclass_id"));
 		
+	}
+
+	public function test_validate_missing_fields() {
+		$validation = \Bu\Test\Sample\SampleClass::validate([]);
+		$this->assertNotEmpty($validation);
+		$this->assertCount(1, $validation);
+		$this->assertArrayHasKey("name", $validation);
+		$this->assertArrayHasKey("error", $validation["name"]);
+		$this->assertEquals(\Bu\Test\Sample\SampleClass::VALIDATE_ERROR_MISSING_FIELD(), $validation["name"]["error"]);
 	}
 
 }
