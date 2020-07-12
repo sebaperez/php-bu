@@ -338,4 +338,46 @@ class BaseTest extends \Bu\Test\BuTest
 		$this->assertEquals(\Bu\Test\Sample\SampleClass::VALIDATE_ERROR_MISSING_FIELD(), $validation["name"]["error"]);
 	}
 
+	public function test_validate_type() {
+		$validation = \Bu\Test\Sample\SampleClass::validate([
+			"name" => $this->getRandomString(),
+			"optional" => $this->getRandomString()
+		]);
+		$this->assertCount(1, $validation);
+		$this->assertArrayHasKey("optional", $validation);
+		$this->assertArrayHasKey("error", $validation["optional"]);
+		$this->assertEquals(\Bu\Test\Sample\SampleClass::VALIDATE_ERROR_TYPE(), $validation["optional"]["error"]);
+		$this->assertEquals(\Bu\Test\Sample\SampleClass::VALIDATE_TYPE_EMAIL(), $validation["optional"]["details"]["type"]);
+	}
+
+	public function test_validate_min_length() {
+		$validation = \Bu\Test\Sample\SampleClass::validate([
+			"name" => $this->getRandomString(),
+			"optional" => $this->getRandomString(1) . "@t.com"
+		]);
+		$this->assertArrayHasKey("optional", $validation);
+		$this->assertArrayHasKey("error", $validation["optional"]);
+		$this->assertEquals(\Bu\Test\Sample\SampleClass::VALIDATE_ERROR_LENGTH(), $validation["optional"]["error"]);
+		$this->assertEquals(10, $validation["optional"]["details"]["min_length"]);
+	}
+
+	public function test_validate_max_length() {
+		$validation = \Bu\Test\Sample\SampleClass::validate([
+			"name" => $this->getRandomString(),
+			"optional" => $this->getRandomString(15) . "@t.com"
+		]);
+		$this->assertArrayHasKey("optional", $validation);
+		$this->assertArrayHasKey("error", $validation["optional"]);
+		$this->assertEquals(\Bu\Test\Sample\SampleClass::VALIDATE_ERROR_LENGTH(), $validation["optional"]["error"]);
+		$this->assertEquals(20, $validation["optional"]["details"]["max_length"]);
+	}
+
+	public function test_validate_ok() {
+		$validation = \Bu\Test\Sample\SampleClass::validate([
+			"name" => $this->getRandomString(),
+			"optional" => $this->getRandomString(10) . "@t.com"
+		]);
+		$this->assertCount(0, $validation);
+	}
+
 }

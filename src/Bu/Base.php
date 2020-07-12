@@ -36,8 +36,17 @@
 		public static function ATTR_WITH_START_DATE() { return 1; }
 		public static function ATTR_WITH_END_DATE() { return 2; }
 
+		// Validation attributes
+		public static function VALIDATE_TYPE_EMAIL() { return "email"; }
+		public static function VALIDATE_TYPE_URL() { return "url"; }
+		public static function VALIDATE_TYPE_DOMAIN() { return "domain"; }
+		public static function VALIDATE_MIN_LENGTH() { return "min_length"; }
+		public static function VALIDATE_MAX_LENGTH() { return "max_length"; }
+
 		// Validation errors
 		public static function VALIDATE_ERROR_MISSING_FIELD() { return "ERROR_MISSING_FIELD"; }
+		public static function VALIDATE_ERROR_TYPE() { return "ERROR_TYPE"; }
+		public static function VALIDATE_ERROR_LENGTH() { return "ERROR_LENGTH"; }
 
 		public static function getDef() {
 			return get_called_class()::DEF();
@@ -217,13 +226,109 @@
 			return date("Y-m-d H:i:s");
 		}
 
+		public static function hasValidate($field) {
+			return isset(self::getField($field)["validate"]);
+		}
+
+		public static function hasValidateType($field) {
+			return self::hasValidate($field) && isset(self::getField($field)["validate"]["type"]);
+		}
+
+		public static function getValidateType($field) {
+			return self::getField($field)["validate"]["type"];
+		}
+
+		public static function hasValidateLength($field) {
+			return (self::hasValidateMinLength($field) || self::hasValidateMaxLength($field));
+		}
+
+		public static function hasValidateMinLength($field) {
+			return isset(self::getField($field)["validate"]["min_length"]);
+		}
+
+		public static function hasValidateMaxLength($field) {
+			return isset(self::getField($field)["validate"]["max_length"]);
+		}
+
+		public static function getValidateMinLength($field) {
+			if (self::hasValidateMinLength($field)) {
+				return self::getField($field)["validate"]["min_length"];
+			}
+			return false;
+		}
+
+		public static function getValidateMaxLength($field) {
+			if (self::hasValidateMaxLength($field)) {
+				return self::getField($field)["validate"]["max_length"];
+			}
+			return false;
+		}
+
+		public static function setError($response, $field, $error, $details = null) {
+			if (! isset($response[$field])) {
+				$response[$field] = [
+					"error" => $error
+				];
+				if ($details) {
+					$response[$field]["details"] = $details;
+				}
+			}
+			return $response;
+		}
+
+		public static function validateType($type, $value) {
+			if ($type === self::VALIDATE_TYPE_EMAIL() && ! filter_var($value, FILTER_VALIDATE_EMAIL)) {
+				return false;
+			} else if ($type === self::VALIDATE_TYPE_URL() && ! filter_var($value, FILTER_VALIDATE_URL)) {
+				return false;
+			} else if ($type === self::VALIDATE_TYPE_DOMAIN() && ! preg_match("/^([a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9])?\.)?([a-zA-Z0-9]{1,2}([-a-zA-Z0-9]{0,252}[a-zA-Z0-9])?)\.([a-zA-Z]{2,63})$/", $value)) {
+				return false;
+			}
+			return true;
+		}
+
 		public static function validate($values = []) {
 			$response = [];
 
 			$mandatoryFields = self::getMandatoryFields();
 			foreach ($mandatoryFields as $mandatoryField) {
 				if (! in_array($mandatoryField, array_keys($values))) {
-					$response[$mandatoryField] = [ "error" => self::VALIDATE_ERROR_MISSING_FIELD() ];
+					$response = self::setError($response, $mandatoryField, self::VALIDATE_ERROR_MISSING_FIELD());
+				}
+			}
+
+			foreach ($values as $field => $value) {
+				if (self::hasValidate($field)) {
+
+					if (self::hasValidateType(($field))) {
+						$type = self::getValidateType($field);
+						$validateType = self::validateType($type, $value);
+						if (! $validateType) {
+							$response = self::setError($response, $field, self::VALIDATE_ERROR_TYPE(), [
+								"type" => $type
+							]);
+						}
+					}
+
+					if (self::hasValidateLength($field)) {
+						$lengthError = [];
+						if (self::hasValidateMinLength($field)) {
+							$minLength = self::getValidateMinLength($field);
+							if ($minLength !== false && strlen($value) < $minLength) {
+								$lengthError["min_length"] = $minLength;
+							}
+						}
+						if (self::hasValidateMaxLength($field)) {
+							$maxLength = self::getValidateMaxLength($field);
+							if ($maxLength !== false && strlen($value) > $maxLength) {
+								$lengthError["max_length"] = $maxLength;
+							}
+						}
+						if (! empty($lengthError)) {
+							$response = self::setError($response, $field, self::VALIDATE_ERROR_LENGTH(), $lengthError);
+						}
+					}
+
 				}
 			}
 

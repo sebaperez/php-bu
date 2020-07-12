@@ -21,7 +21,12 @@ class SampleClass extends Base
 				],
 				"optional" => [
 					"type" => self::TYPE_STRING(),
-					"attr" => [ self::ATTR_OPTIONAL() ]
+					"attr" => [ self::ATTR_OPTIONAL() ],
+					"validate" => [
+						"type" => self::VALIDATE_TYPE_EMAIL(),
+						"min_length" => 10,
+						"max_length" => 20
+					]
 				]
 			],
 			"pk" => ["sampleclass_id"],
