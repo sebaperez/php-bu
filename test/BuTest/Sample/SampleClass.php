@@ -27,6 +27,24 @@ class SampleClass extends Base
 						"min_length" => 10,
 						"max_length" => 20
 					]
+				],
+				"date" => [
+					"type" => self::TYPE_STRING(),
+					"attr" => [ self::ATTR_OPTIONAL() ],
+					"validate" => [
+						"type" => self::VALIDATE_TYPE_DATE(),
+						"min_date" => "2020-01-01",
+						"max_date" => "2020-01-31"
+					]
+				],
+				"time" => [
+					"type" => self::TYPE_STRING(),
+					"attr" => [ self::ATTR_OPTIONAL() ],
+					"validate" => [
+						"type" => self::VALIDATE_TYPE_TIME(),
+						"min_date" => "14:00:00",
+						"max_date" => "15:00:00"
+					]
 				]
 			],
 			"pk" => ["sampleclass_id"],

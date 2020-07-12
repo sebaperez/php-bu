@@ -43,7 +43,7 @@ class BaseTest extends \Bu\Test\BuTest
 	{
 		$fieldsName = \Bu\Test\Sample\SampleClass::getFieldNames();
 		$this->assertIsArray($fieldsName);
-		$this->assertEquals($fieldsName, ["sampleclass_id", "name", "optional", "start_date", "end_date"]);
+		$this->assertEquals($fieldsName, ["sampleclass_id", "name", "optional", "date", "time", "start_date", "end_date"]);
 	}
 
 	public function test_is_valid_field()
@@ -370,6 +370,50 @@ class BaseTest extends \Bu\Test\BuTest
 		$this->assertArrayHasKey("error", $validation["optional"]);
 		$this->assertEquals(\Bu\Test\Sample\SampleClass::VALIDATE_ERROR_LENGTH(), $validation["optional"]["error"]);
 		$this->assertEquals(20, $validation["optional"]["details"]["max_length"]);
+	}
+
+	public function test_validate_min_date() {
+		$validation = \Bu\Test\Sample\SampleClass::validate([
+			"name" => $this->getRandomString(),
+			"date" => "2019-01-01"
+		]);
+		$this->assertArrayHasKey("date", $validation);
+		$this->assertArrayHasKey("error", $validation["date"]);
+		$this->assertEquals(\Bu\Test\Sample\SampleClass::VALIDATE_ERROR_DATE(), $validation["date"]["error"]);
+		$this->assertEquals("2020-01-01", $validation["date"]["details"]["min_date"]);
+	}
+
+	public function test_validate_max_date() {
+		$validation = \Bu\Test\Sample\SampleClass::validate([
+			"name" => $this->getRandomString(),
+			"date" => "2021-01-01"
+		]);
+		$this->assertArrayHasKey("date", $validation);
+		$this->assertArrayHasKey("error", $validation["date"]);
+		$this->assertEquals(\Bu\Test\Sample\SampleClass::VALIDATE_ERROR_DATE(), $validation["date"]["error"]);
+		$this->assertEquals("2020-01-31", $validation["date"]["details"]["max_date"]);
+	}
+
+	public function test_validate_min_time() {
+		$validation = \Bu\Test\Sample\SampleClass::validate([
+			"name" => $this->getRandomString(),
+			"time" => "07:00:00"
+		]);
+		$this->assertArrayHasKey("time", $validation);
+		$this->assertArrayHasKey("error", $validation["time"]);
+		$this->assertEquals(\Bu\Test\Sample\SampleClass::VALIDATE_ERROR_DATE(), $validation["time"]["error"]);
+		$this->assertEquals("14:00:00", $validation["time"]["details"]["min_date"]);
+	}
+
+	public function test_validate_max_time() {
+		$validation = \Bu\Test\Sample\SampleClass::validate([
+			"name" => $this->getRandomString(),
+			"time" => "18:00:00"
+		]);
+		$this->assertArrayHasKey("time", $validation);
+		$this->assertArrayHasKey("error", $validation["time"]);
+		$this->assertEquals(\Bu\Test\Sample\SampleClass::VALIDATE_ERROR_DATE(), $validation["time"]["error"]);
+		$this->assertEquals("15:00:00", $validation["time"]["details"]["max_date"]);
 	}
 
 	public function test_validate_ok() {
