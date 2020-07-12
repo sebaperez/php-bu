@@ -52,6 +52,7 @@ trait Factory
             $params = array_merge($params, $paramsPreObject);
         }
         $params = $this->fillDefaultValues($class, $params);
+        $this->assertEmpty($class::validate($params));
         $object = $class::add($params);
         if ($object) {
             array_push($this->_factoryObjects, $object);

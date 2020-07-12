@@ -377,7 +377,7 @@ class BaseTest extends \Bu\Test\BuTest
 			"name" => $this->getRandomString(),
 			"optional" => $this->getRandomString(10) . "@t.com"
 		]);
-		$this->assertCount(0, $validation);
+		$this->assertEmpty($validation);
 	}
 
 }
