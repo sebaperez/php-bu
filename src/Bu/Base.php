@@ -40,6 +40,13 @@
 		public static function VALIDATE_TYPE_EMAIL() { return "email"; }
 		public static function VALIDATE_TYPE_URL() { return "url"; }
 		public static function VALIDATE_TYPE_DOMAIN() { return "domain"; }
+		public static function VALIDATE_TYPE_STRING() { return "string"; }
+		public static function VALIDATE_TYPE_INT() { return "int"; }
+		public static function VALIDATE_TYPE_NUMBER() { return "number"; }
+		public static function VALIDATE_TYPE_DATE() { return "date"; }
+		public static function VALIDATE_TYPE_DATETIME() { return "datetime"; }
+		public static function VALIDATE_TYPE_TIME() { return "time"; }
+		public static function VALIDATE_TYPE_HOUR_MINUTE() { return "hourminute"; }
 		public static function VALIDATE_MIN_LENGTH() { return "min_length"; }
 		public static function VALIDATE_MAX_LENGTH() { return "max_length"; }
 
@@ -276,12 +283,31 @@
 			return $response;
 		}
 
+		public static function validateDateTime($format, $value) {
+			$d = \DateTime::createFromFormat($format, $value);
+			return ($d && $d->format($format) === $value);
+		}
+
 		public static function validateType($type, $value) {
 			if ($type === self::VALIDATE_TYPE_EMAIL() && ! filter_var($value, FILTER_VALIDATE_EMAIL)) {
 				return false;
 			} else if ($type === self::VALIDATE_TYPE_URL() && ! filter_var($value, FILTER_VALIDATE_URL)) {
 				return false;
 			} else if ($type === self::VALIDATE_TYPE_DOMAIN() && ! preg_match("/^([a-zA-Z0-9]([-a-zA-Z0-9]{0,61}[a-zA-Z0-9])?\.)?([a-zA-Z0-9]{1,2}([-a-zA-Z0-9]{0,252}[a-zA-Z0-9])?)\.([a-zA-Z]{2,63})$/", $value)) {
+				return false;
+			} else if ($type === self::VALIDATE_TYPE_STRING() && ! is_string($value)) {
+				return false;
+			} else if ($type === self::VALIDATE_TYPE_INT() && ! is_int($value)) {
+				return false;
+			} else if ($type === self::VALIDATE_TYPE_NUMBER() && ! is_numeric($value)) {
+				return false;
+			} else if ($type === self::VALIDATE_TYPE_DATE() && ! self::validateDateTime("Y-m-d", $value)) {
+				return false;
+			} else if ($type === self::VALIDATE_TYPE_DATETIME() && ! self::validateDateTime("Y-m-d H:i:s", $value)) {
+				return false;
+			} else if ($type === self::VALIDATE_TYPE_TIME() && ! self::validateDateTime("H:i:s", $value)) {
+				return false;
+			} else if ($type === self::VALIDATE_TYPE_HOUR_MINUTE() && ! self::validateDateTime("H:i", $value)) {
 				return false;
 			}
 			return true;

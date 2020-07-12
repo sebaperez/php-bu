@@ -380,4 +380,183 @@ class BaseTest extends \Bu\Test\BuTest
 		$this->assertEmpty($validation);
 	}
 
+	public function assertValidType($type, $value) {
+		return $this->assertTrue(\Bu\Base::validateType($type, $value), "Failed asserting that $value is a valid $type");
+	}
+
+	public function assertNotValidType($type, $value) {
+		return $this->assertFalse(\Bu\Base::validateType($type, $value), "Failed asserting that $value is not a valid $type");
+	}
+
+	public function assertValid($type, $values) {
+		foreach ($values["valid"] as $value) {
+			$this->assertValidType($type, $value);
+		}
+		foreach ($values["invalid"] as $value) {
+			$this->assertNotValidType($type, $value);
+		}
+	}
+
+	public function test_valid_email() {
+		$this->assertValid(\Bu\Base::VALIDATE_TYPE_EMAIL(), [
+			"valid" => [
+				"test@test.com",
+				"test@test.edu.ar",
+				"test@rare.domain"
+			],
+			"invalid" => [
+				"@test.com",
+				"test.com",
+				$this->getRandomString()
+			] 
+		]);
+	}
+
+	public function test_valid_url() {
+		$this->assertValid(\Bu\Base::VALIDATE_TYPE_URL(), [
+			"valid" => [
+				"http://test.com",
+				"https://test.com",
+				"http://test.com/test",
+				"http://www.test.com/test",
+				"http://www.test.com/test.html",
+				"http://www.test.com/test.html?p=1",
+				"http://www.test.com/test.html?p=1&t=2",
+				"ftp://test.com"
+			],
+			"invalid" => [
+				"test.com",
+				"test.com/url",
+				$this->getRandomString(),
+				"1",
+				1
+			]
+		]);
+	}
+
+	public function test_valid_domain() {
+		$this->assertValid(\Bu\Base::VALIDATE_TYPE_DOMAIN(), [
+			"valid" => [
+				"test.com",
+				"rare.domain"
+			],
+			"invalid" => [
+				"http://test.com",
+				$this->getRandomString(),
+				"1",
+				1
+			]
+		]);
+	}
+
+	public function test_valid_string() {
+		$this->assertValid(\Bu\Base::VALIDATE_TYPE_STRING(), [
+			"valid" => [
+				$this->getRandomString(),
+				"test.com",
+				"1"
+			],
+			"invalid" => [
+				1
+			]
+		]);		
+	}
+
+	public function test_valid_int() {
+		$this->assertValid(\Bu\Base::VALIDATE_TYPE_INT(), [
+			"valid" => [
+				1
+			],
+			"invalid" => [
+				1.0,
+				1.2,
+				$this->getRandomString(),
+				"1"
+			]
+		]);		
+	}
+
+	public function test_valid_number() {
+		$this->assertValid(\Bu\Base::VALIDATE_TYPE_NUMBER(), [
+			"valid" => [
+				1,
+				1.0,
+				1.2,
+				"1",
+				"1.2"
+			],
+			"invalid" => [
+				$this->getRandomString()
+			]
+		]);		
+	}
+
+	public function test_valid_date() {
+		$this->assertValid(\Bu\Base::VALIDATE_TYPE_DATE(), [
+			"valid" => [
+				"2020-01-01"
+			],
+			"invalid" => [
+				$this->getRandomString(),
+				"2020-01-01 14:14:14",
+				"2020-13-01",
+				"2020-02-30"
+			]
+		]);		
+	}
+
+	public function test_valid_datetime() {
+		$this->assertValid(\Bu\Base::VALIDATE_TYPE_DATETIME(), [
+			"valid" => [
+				"2020-01-01 14:14:14",
+			],
+			"invalid" => [
+				$this->getRandomString(),
+				"2020-01-01",
+				"2020-13-01",
+				"2020-02-30",
+				"14:14:14",
+				"2020-01-01 24:14:14",
+				"2020-01-01 14:14:60",
+				"2020-01-01 14:60:14"
+			]
+		]);		
+	}
+
+	public function test_valid_time() {
+		$this->assertValid(\Bu\Base::VALIDATE_TYPE_TIME(), [
+			"valid" => [
+				"14:14:14"
+			],
+			"invalid" => [
+				$this->getRandomString(),
+				"2020-01-01",
+				"2020-13-01",
+				"2020-02-30",
+				"2020-01-01 14:14:14",
+				"24:14:14",
+				"14:14:60",
+				"14:60:14"
+			]
+		]);		
+	}
+
+	public function test_valid_time_hour_minute() {
+		$this->assertValid(\Bu\Base::VALIDATE_TYPE_HOUR_MINUTE(), [
+			"valid" => [
+				"14:14"
+			],
+			"invalid" => [
+				$this->getRandomString(),
+				"2020-01-01",
+				"2020-13-01",
+				"2020-02-30",
+				"2020-01-01 14:14:14",
+				"14:14:14",
+				"24:14",
+				"14:60"
+			]
+		]);		
+	}
+
 }
