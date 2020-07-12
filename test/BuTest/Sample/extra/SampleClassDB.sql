@@ -7,6 +7,7 @@ create table if not exists sampleclass (
 	optional varchar(255),
 	date datetime,
 	time datetime,
+	max_time datetime,
         start_date datetime,
         end_date datetime,
         primary key(sampleclass_id)

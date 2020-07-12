@@ -43,9 +43,17 @@ class SampleClass extends Base
 					"validate" => [
 						"type" => self::VALIDATE_TYPE_TIME(),
 						"min_date" => "14:00:00",
-						"max_date" => "15:00:00"
+						"max_date" => "now"
 					]
-				]
+				],
+				"max_time" => [
+					"type" => self::TYPE_STRING(),
+					"attr" => [ self::ATTR_OPTIONAL() ],
+					"validate" => [
+						"type" => self::VALIDATE_TYPE_TIME(),
+						"max_date" => "now"
+					]
+				],				
 			],
 			"pk" => ["sampleclass_id"],
 			"attr" => [ self::ATTR_WITH_START_DATE(), self::ATTR_WITH_END_DATE() ]

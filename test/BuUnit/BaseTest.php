@@ -43,7 +43,7 @@ class BaseTest extends \Bu\Test\BuTest
 	{
 		$fieldsName = \Bu\Test\Sample\SampleClass::getFieldNames();
 		$this->assertIsArray($fieldsName);
-		$this->assertEquals($fieldsName, ["sampleclass_id", "name", "optional", "date", "time", "start_date", "end_date"]);
+		$this->assertEquals($fieldsName, ["sampleclass_id", "name", "optional", "date", "time", "max_time", "start_date", "end_date"]);
 	}
 
 	public function test_is_valid_field()
@@ -408,12 +408,21 @@ class BaseTest extends \Bu\Test\BuTest
 	public function test_validate_max_time() {
 		$validation = \Bu\Test\Sample\SampleClass::validate([
 			"name" => $this->getRandomString(),
-			"time" => "18:00:00"
+			"time" => date('H:i:s', strtotime(date('H:i:s') . ' + 1 minute'))
 		]);
 		$this->assertArrayHasKey("time", $validation);
 		$this->assertArrayHasKey("error", $validation["time"]);
 		$this->assertEquals(\Bu\Test\Sample\SampleClass::VALIDATE_ERROR_DATE(), $validation["time"]["error"]);
-		$this->assertEquals("15:00:00", $validation["time"]["details"]["max_date"]);
+		$this->assertEquals("now", $validation["time"]["details"]["max_date"]);
+	}
+
+	public function test_validate_max_time_pass_with_now() {
+		$validation = \Bu\Test\Sample\SampleClass::validate([
+			"name" => $this->getRandomString(),
+			"max_time" => date('H:i:s', strtotime(date('H:i:s') . ' - 1 minute'))
+		]);
+		$this->assertEmpty($validation);
+		$this->assertArrayNotHasKey("max_time", $validation);
 	}
 
 	public function test_validate_ok() {
