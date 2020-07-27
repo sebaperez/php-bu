@@ -21,3 +21,32 @@ create table if not exists sampleclassmultiplepk (
         end_date datetime,
         primary key(id1, id2)
 );
+
+create table if not exists account (
+	account_id int auto_increment,
+	name varchar(255),
+	start_date datetime,
+	end_date datetime,
+	primary key(account_id)
+);
+
+create table if not exists user (
+	user_id int auto_increment,
+	account_id int,
+	email varchar(255),
+	name varchar(255),
+	lastname varchar(255),
+	password varchar(255),
+	start_date datetime,
+	end_date datetime,
+	primary key(user_id)
+);
+
+create table if not exists session (
+	session_id int auto_increment,
+	user_id int,
+	hash varchar(255),
+	start_date datetime,
+	end_date datetime,
+	primary key(session_id)
+);

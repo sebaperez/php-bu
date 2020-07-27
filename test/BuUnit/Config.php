@@ -25,7 +25,13 @@
                         return [ "id1" => $object1->getValue("sampleclass_id"), "id2" => $object2->getValue("sampleclass_id") ];
                     },
                     "key" => [ "id1", "id2" ]
-                ]
+                ],
+                "\Bu\Test\Sample\Account" => [
+                    "values" => [
+                        "name" => $this->getRandomString()
+                    ],
+                    "key" => [ "account_id" ]
+                ],
             ];
         }
 
