@@ -32,11 +32,7 @@ class Account extends \Bu\Base
 	}
 
 	public function addUser($values) {
-		$userClass = self::GET_DEFAULT_FK_CLASS_USER_ID();
-		return $userClass::add(array_merge(
-			[ "account_id" =>  $this->getValue("account_id") ],
-			$values
-		));
+		return $this->associate(self::GET_DEFAULT_FK_CLASS_USER_ID(), $values);
 	}
 }
 

@@ -19,7 +19,7 @@ class User extends \Bu\Base
                 "account_id" => [
                     "type" => self::TYPE_INT(),
                     "fk" => [
-                        "class" => self::GET_DEFAULT_FK_CLASS_ACCOUNT_ID()
+                        "class" => get_called_class()::GET_DEFAULT_FK_CLASS_ACCOUNT_ID()
                     ]
                 ],
                 "email" => [
@@ -42,6 +42,29 @@ class User extends \Bu\Base
     }
     
     public static function GET_DEFAULT_FK_CLASS_ACCOUNT_ID() { return "Bu\DefaultClass\Account"; }
+    public static function GET_DEFAULT_FK_CLASS_SESSION() { return "Bu\DefaultClass\Session"; }
+
+    public static function add($values = null) {
+        $values["password"] = self::encrypt($values["password"]);
+        return parent::add($values);
+    }
+
+    public static function validateCredentials($email = "", $password = "") {
+        $users = self::find("email = ? and password = ?", [
+            "email" => $email,
+            "password" => self::encrypt($password)
+        ]);
+        if (count($users) === 1) {
+            return $users[0];
+        }
+    }
+
+    public static function getNewSession($email, $password) {
+        if ($user = self::validateCredentials($email, $password)) {
+            $session = $user->associate(get_called_class()::GET_DEFAULT_FK_CLASS_SESSION());
+            return $session;
+        }
+    }
 
 }
 

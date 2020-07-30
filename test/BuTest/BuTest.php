@@ -26,5 +26,9 @@
 			return "https://www." . $this->getRandomString() . ".com";
 		}
 
+		public function getRandomEmail() {
+			return $this->getRandomString() . "@" . $this->getRandomString() . ".com";
+		}
+
 	}
 ?>

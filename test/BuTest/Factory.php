@@ -52,7 +52,8 @@ trait Factory
             $params = array_merge($params, $paramsPreObject);
         }
         $params = $this->fillDefaultValues($class, $params);
-        $this->assertEmpty($class::validate($params));
+        $validation = $class::validate($params);
+        $this->assertEmpty($validation, "Error on validation: " . json_encode($validation));
         $object = $class::add($params);
         if ($object) {
             array_push($this->_factoryObjects, $object);

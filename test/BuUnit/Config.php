@@ -32,6 +32,18 @@
                     ],
                     "key" => [ "account_id" ]
                 ],
+                "\Bu\Test\Sample\User" => [
+                    "values" => [
+                        "email" => $this->getRandomEmail(),
+                        "name" => $this->getRandomString(),
+                        "password" => $this->getRandomString()
+                    ],
+                    "key" => [ "user_id" ],
+                    "function" => function() {
+                        $account = $this->getNew("Account");
+                        return [ "account_id" => $account->getValue("account_id") ];
+                    }
+                ],
             ];
         }
 

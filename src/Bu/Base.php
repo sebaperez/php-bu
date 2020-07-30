@@ -281,16 +281,37 @@
 			return $class::get($this->getValue($field));
 		}
 
-		public function findObjects($class) {
+		public static function getExternalClassFK($class) {
 			$fields = $class::getFields();
-			$fk_fields = [];
-			$r = [];
+			$fkFields = [];
 			foreach ($fields as $field => $fieldDef) {
 				if (isset($fieldDef["fk"]) && $fieldDef["fk"]["class"] == get_called_class()) {
-					array_push($fk_fields, $field);
+					array_push($fkFields, $field);
 				}
 			}
-			foreach ($fk_fields as $field) {
+			return $fkFields;
+		}
+
+		public static function hasSingleFKReference($class) {
+			return count(self::getExternalClassFK($class)) === 1;
+		}
+
+		public function associate($class, $values = []) {
+			if (! self::hasSinglePK()) {
+				throw new \Bu\Exception\InvalidObject("Cannot associate external class to multiple PKs class");
+			} else if (! self::hasSingleFKReference($class)) {
+				throw new \Bu\Exception\InvalidObject("External class has 0 or more than 1 reference to PK");
+			}
+			$fkField = self::getExternalClassFK($class)[0];
+			$pkValue = $this->getValue(self::getPK()[0]);
+			$values = array_merge($values, [ $fkField => $pkValue ]);
+			return $class::add($values);
+		}
+
+		public function findObjects($class) {
+			$fkFields = self::getExternalClassFK($class);
+			$r = [];
+			foreach ($fkFields as $field) {
 				$_r = $class::find("$field = ?", [ $field => $this->getValue($this->getPK()[0]) ]);
 				$r = array_merge($r, $_r);
 			}
