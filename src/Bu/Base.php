@@ -32,6 +32,7 @@
 
 		public static function ATTR_AUTO_INCREMENT() { return 1; }
 		public static function ATTR_OPTIONAL() { return 2; }
+		public static function ATTR_SELF_DEFINED() { return 3; }
 
 		// Class attributes
 
@@ -135,13 +136,23 @@
 			return in_array(self::ATTR_WITH_END_DATE(), self::getAttr());
 		}
 
+		public static function isFieldMandatory($fieldName) {
+			$field = self::getField($fieldName);
+			if (! isset($field["attr"])) {
+				return true;
+			} else if (isset($values["attr"]) &&
+			! in_array(self::ATTR_OPTIONAL(), $field["attr"]) &&
+			! in_array($fieldName, self::getPK())) {
+				return true;
+			}
+			return false;
+		}
+
 		public static function getMandatoryFields() {
 			$fields = self::getFields();
 			$r = [];
 			foreach ($fields as $fieldName => $values) {
-				if (! isset($values["attr"])) {
-					array_push($r, $fieldName);
-				} else if (isset($values["attr"]) && ($values["attr"] & self::ATTR_OPTIONAL())) {
+				if (self::isFieldMandatory($fieldName)) {
 					array_push($r, $fieldName);
 				}
 			}
@@ -208,6 +219,14 @@
 			return $objects;
 		}
 
+		public static function findFirst($condition = null, $queryValues = null) {
+			$objects = self::find($condition, $queryValues);
+			if (count($objects) === 1) {
+				return $objects[0];
+			}
+			return null;
+		}
+
 		public static function findAll() {
 			return self::find("1 = 1");
 		}
@@ -219,8 +238,6 @@
 		public static function add($values = null) {
 			if (! $values) {
 				throw new \Bu\Exception\InvalidArgument("values not defined for Bu::add");
-			} else if (! self::arraysAreEqualsUnsorted(self::getMandatoryFields(), array_keys($values))) {
-				throw new \Bu\Exception\InvalidArgument("Bu::add missing or invalid fields: " . implode(", ", self::getDiffArrayKeys(self::getMandatoryFields(), array_keys($values))));
 			} else if (self::hasSinglePK() && in_array(self::getPK()[0], array_keys($values))) {
 				throw new \Bu\Exception\InvalidArgument("PK cannot be set in Bu::add");
 			}

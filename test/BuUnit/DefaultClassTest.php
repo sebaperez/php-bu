@@ -47,6 +47,19 @@ class DefaultTest extends \Bu\Test\BuTest
         $this->assertEquals($user->getValue("user_id"), $_user->getValue("user_id"));
     }
 
+    public function test_get_session_by_hash() {
+        $session = $this->getNew("Session");
+        $_session = \Bu\Test\Sample\Session::getByHash($session->getValue("hash"));
+        $this->assertEquals($session->getValue("session_id"), $_session->getValue("session_id"));
+    }
+
+    public function test_logout() {
+        $session = $this->getNew("Session");
+        $this->assertTrue($session->logout());
+        $_session = \Bu\Test\Sample\Session::getByHash($session->getValue("hash"));
+        $this->assertNull($_session);
+    }
+
 }
 
 ?>

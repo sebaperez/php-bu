@@ -44,6 +44,13 @@
                         return [ "account_id" => $account->getValue("account_id") ];
                     }
                 ],
+                "\Bu\Test\Sample\Session" => [
+                    "key" => [ "session_id" ],
+                    "function" => function() {
+                        $user = $this->getNew("User");
+                        return [ "user_id" => $user->getValue("user_id") ];
+                    }
+                ]
             ];
         }
 

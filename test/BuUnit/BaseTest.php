@@ -119,12 +119,6 @@ class BaseTest extends \Bu\Test\BuTest
 		$this->assertEquals($fields, ["name"]);
 	}
 
-	public function test_add_invalid_value()
-	{
-		$this->expectException(\Bu\Exception\InvalidArgument::class);
-		$sampleobject = \Bu\Test\Sample\SampleClass::add(["name" => "test", "test" => 1]);
-	}
-
 	public function test_add_single_pk_cannot_be_set()
 	{
 		$this->expectException(\Bu\Exception\InvalidArgument::class);

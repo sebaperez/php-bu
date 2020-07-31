@@ -50,13 +50,10 @@ class User extends \Bu\Base
     }
 
     public static function validateCredentials($email = "", $password = "") {
-        $users = self::find("email = ? and password = ?", [
+        return self::findFirst("email = ? and password = ?", [
             "email" => $email,
             "password" => self::encrypt($password)
         ]);
-        if (count($users) === 1) {
-            return $users[0];
-        }
     }
 
     public static function getNewSession($email, $password) {

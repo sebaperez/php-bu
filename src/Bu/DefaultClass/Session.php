@@ -23,7 +23,8 @@ class Session extends \Bu\Base
                     ]
                 ],
                 "hash" => [
-                    "type" => self::TYPE_STRING()
+					"type" => self::TYPE_STRING(),
+					"attr" => [ self::ATTR_SELF_DEFINED() ]
                 ]
 			],
 			"pk" => [ "session_id" ],
@@ -40,8 +41,16 @@ class Session extends \Bu\Base
 		return parent::add($values);
 	}
 
+	public static function getByHash($hash) {
+		return self::findFirst("hash = ?", [ "hash" => $hash ]);
+	}
+
 	public function getUser() {
 		return $this->getObject("user_id");
+	}
+
+	public function logout() {
+		return $this->delete();
 	}
 }
 
