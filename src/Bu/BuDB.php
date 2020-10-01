@@ -6,7 +6,6 @@ use Bu\Bu;
 
 class BuDB extends Bu
 {
-
     private static $HOST = "localhost";
     private static $USER = "root";
     private static $PASS = "";

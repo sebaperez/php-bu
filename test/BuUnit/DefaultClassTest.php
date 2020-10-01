@@ -9,23 +9,28 @@ namespace Bu\BuUnit;
 
 class DefaultTest extends \Bu\Test\BuTest
 {
-	
-    public static function CONFIG_CLASS() { return "\Bu\BuUnit\Config"; }
-    
-    public function test_create_new_account() {
+    public static function CONFIG_CLASS()
+    {
+        return "\Bu\BuUnit\Config";
+    }
+
+    public function test_create_new_account()
+    {
         $account = $this->getNew("Account");
         $this->assertNotNull($account);
         $this->assertInstanceOf("\Bu\Test\Sample\Account", $account);
         $this->assertIsInt($account->getValue("account_id"));
     }
 
-    public function test_account_has_fk_reference_from_user() {
+    public function test_account_has_fk_reference_from_user()
+    {
         $fks = \Bu\Test\Sample\Account::getExternalClassFK("\Bu\Test\Sample\User");
         $this->assertCount(1, $fks);
         $this->assertEquals("account_id", $fks[0]);
     }
 
-    public function test_add_new_user_to_account() {
+    public function test_add_new_user_to_account()
+    {
         $account = $this->getNew("Account");
         $user = $account->addUser([
             "email" => $this->getRandomString(),
@@ -37,7 +42,8 @@ class DefaultTest extends \Bu\Test\BuTest
         $this->assertInstanceOf("\Bu\Test\Sample\User", $user);
     }
 
-    public function test_login_user() {
+    public function test_login_user()
+    {
         $password = $this->getRandomString();
         $user = $this->getNew("User", [ "password" => $password ]);
         $this->assertNotNull(\Bu\Test\Sample\User::validateCredentials($user->getValue("email"), $password));
@@ -47,19 +53,18 @@ class DefaultTest extends \Bu\Test\BuTest
         $this->assertEquals($user->getValue("user_id"), $_user->getValue("user_id"));
     }
 
-    public function test_get_session_by_hash() {
+    public function test_get_session_by_hash()
+    {
         $session = $this->getNew("Session");
         $_session = \Bu\Test\Sample\Session::getByHash($session->getValue("hash"));
         $this->assertEquals($session->getValue("session_id"), $_session->getValue("session_id"));
     }
 
-    public function test_logout() {
+    public function test_logout()
+    {
         $session = $this->getNew("Session");
         $this->assertTrue($session->logout());
         $_session = \Bu\Test\Sample\Session::getByHash($session->getValue("hash"));
         $this->assertNull($_session);
     }
-
 }
-
-?>

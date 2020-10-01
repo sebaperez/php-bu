@@ -1,11 +1,9 @@
 <?php
 
-	namespace Bu\Exception;
+    namespace Bu\Exception;
 
-	use Bu\BuException;
+    use Bu\BuException;
 
-	class InvalidObject extends BuException {
-
-	}
-
-?>
+    class InvalidObject extends BuException
+    {
+    }

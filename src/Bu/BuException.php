@@ -1,12 +1,10 @@
 <?php
 
-	namespace Bu;
+    namespace Bu;
 
-	use Bu\Bu;
-	use Exception;
+    use Bu\Bu;
+    use Exception;
 
-	class BuException extends Exception {
-
-	}
-
-?>
+    class BuException extends Exception
+    {
+    }

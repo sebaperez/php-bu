@@ -2,12 +2,19 @@
 
     namespace Bu\BuUnit;
 
-    class Config extends \Bu\Test\BuTest {
+    class Config extends \Bu\Test\BuTest
+    {
+        public function BASE_CLASS()
+        {
+            return "\Bu\Test\Sample";
+        }
+        public function CONFIG_CLASS()
+        {
+            return "\Bu\BuUnit\Config";
+        }
 
-        public function BASE_CLASS() { return "\Bu\Test\Sample"; }
-        public function CONFIG_CLASS() { return "\Bu\BuUnit\Config"; }
-
-        public function DEFAULT() {
+        public function DEFAULT()
+        {
             return [
                 "\Bu\Test\Sample\SampleClass" => [
                     "values" => [
@@ -19,7 +26,7 @@
                     "values" => [
                         "name" => $this->getRandomString()
                     ],
-                    "function" => function() {
+                    "function" => function () {
                         $object1 = $this->getNew("SampleClass");
                         $object2 = $this->getNew("SampleClass");
                         return [ "id1" => $object1->getValue("sampleclass_id"), "id2" => $object2->getValue("sampleclass_id") ];
@@ -39,21 +46,18 @@
                         "password" => $this->getRandomString()
                     ],
                     "key" => [ "user_id" ],
-                    "function" => function() {
+                    "function" => function () {
                         $account = $this->getNew("Account");
                         return [ "account_id" => $account->getValue("account_id") ];
                     }
                 ],
                 "\Bu\Test\Sample\Session" => [
                     "key" => [ "session_id" ],
-                    "function" => function() {
+                    "function" => function () {
                         $user = $this->getNew("User");
                         return [ "user_id" => $user->getValue("user_id") ];
                     }
                 ]
             ];
         }
-
     }
-
-?>

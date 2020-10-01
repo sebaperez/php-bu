@@ -4,7 +4,6 @@ namespace Bu\Test;
 
 trait Factory
 {
-
     public $_factoryObjects = [];
 
     public function tearDown(): void
@@ -16,11 +15,13 @@ trait Factory
         }
     }
 
-    public function getConfigClass() {
+    public function getConfigClass()
+    {
         return get_called_class()::CONFIG_CLASS();
     }
 
-    public function fillDefaultValues($class, $params) {
+    public function fillDefaultValues($class, $params)
+    {
         $DEFAULT = $this->getPreObjectsDefinition();
         if (isset($DEFAULT[$class]) && isset($DEFAULT[$class]["values"])) {
             $defaultParams = $DEFAULT[$class]["values"];
@@ -33,12 +34,14 @@ trait Factory
         return $params;
     }
 
-    public function getConfigObject() {
+    public function getConfigObject()
+    {
         $config_class = self::getConfigClass();
         return new $config_class();
     }
 
-    public function getPreObjectsDefinition() {
+    public function getPreObjectsDefinition()
+    {
         return $this->getConfigObject()->DEFAULT();
     }
 
@@ -61,11 +64,13 @@ trait Factory
         }
     }
 
-    public function getBaseClass() {
+    public function getBaseClass()
+    {
         return $this->getConfigObject()->BASE_CLASS();
     }
 
-    public function hasBaseClass() {
+    public function hasBaseClass()
+    {
         return method_exists($this->getConfigObject(), "BASE_CLASS");
     }
 
