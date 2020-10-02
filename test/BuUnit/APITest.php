@@ -7,6 +7,11 @@ namespace Bu\BuUnit;
 
 class APITest extends \Bu\Test\BuTest
 {
+    public static function CONFIG_CLASS()
+    {
+        return "\Bu\BuUnit\Config";
+    }
+
     public function test_create_new_instance_of_api()
     {
         $api = \Bu\API::call("test");
@@ -69,5 +74,21 @@ class APITest extends \Bu\Test\BuTest
     public function test_error_invalid_parameters()
     {
         $this->assertAPIError(\Bu\API::API_ERROR_INVALID_PARAMETERS(), $this->getRandomString() . "/" . $this->getRandomString(), $this->getRandomString());
+    }
+
+    public function getSampleAPICall($method, $parameters)
+    {
+        $api = \Bu\Test\Sample\API::call($method, json_encode($parameters));
+        $this->assertFalse($api->hasErrors());
+        return $api;
+    }
+
+    public function test_execute_method_view()
+    {
+        $sample = $this->getNew("SampleClass");
+        $api = $this->getSampleAPICall("sample/view", [ "sampleclass_id" => $sample->getValue("sampleclass_id") ]);
+        $result = $api->execute();
+        $this->assertNotNull($result);
+        $this->assertEquals($result["sampleclass_id"], $sample->getValue("sampleclass_id"));
     }
 }

@@ -6,7 +6,8 @@
     {
         public static function call($method, $parameters = [])
         {
-            return new API($method, $parameters);
+            $APIClass = get_called_class();
+            return new $APIClass($method, $parameters);
         }
 
         public static function API_ERROR_INVALID_CLASSNAME()
@@ -68,6 +69,9 @@
             $this->errors = [];
 
             $this->setErrors();
+            if (! $this->hasErrors()) {
+                $this->parameters = json_decode($parameters, true);
+            }
         }
 
         public function getMethod()
@@ -165,6 +169,17 @@
               self::ACTION_DEL() => function ($classname, $parameters) {
               },
               self::ACTION_VIEW() => function ($classname, $parameters) {
+                  if ($classname::hasSinglePK()) {
+                      $pkValue = $parameters[$classname::getPK()[0]];
+                  } else {
+                      $pkValue = array_filter($parameters, function ($key, $value) {
+                          if (in_array($key, $classname::getPK())) {
+                              return [ $key => $value ];
+                          }
+                      }, ARRAY_FILTER_USE_BOTH);
+                  }
+                  $object = $classname::get($pkValue);
+                  return $object->getValues();
               },
               self::ACTION_MODIFY() => function ($classname, $parameters) {
               }
