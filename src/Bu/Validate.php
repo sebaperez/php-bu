@@ -54,6 +54,10 @@
         {
             return "max_length";
         }
+        public static function VALIDATE_TYPE_JSON()
+        {
+            return "json";
+        }
 
         // Validation errors
         public static function VALIDATE_ERROR_MISSING_FIELD()
@@ -182,6 +186,15 @@
             return self::hasDateValidate($field) || self::hasTimeValidate($field);
         }
 
+        public static function validateJSON($value = null)
+        {
+            if (! empty($value)) {
+                @json_decode($value);
+                return (json_last_error() === JSON_ERROR_NONE);
+            }
+            return false;
+        }
+
         public static function validateType($type, $value)
         {
             if ($type === self::VALIDATE_TYPE_EMAIL() && ! filter_var($value, FILTER_VALIDATE_EMAIL)) {
@@ -203,6 +216,8 @@
             } elseif ($type === self::VALIDATE_TYPE_TIME() && ! self::validateDateTime("H:i:s", $value)) {
                 return false;
             } elseif ($type === self::VALIDATE_TYPE_HOUR_MINUTE() && ! self::validateDateTime("H:i", $value)) {
+                return false;
+            } elseif ($type === self::VALIDATE_TYPE_JSON() & ! self::validateJSON($value)) {
                 return false;
             }
             return true;
