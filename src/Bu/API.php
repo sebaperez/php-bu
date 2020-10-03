@@ -4,10 +4,16 @@
 
     class API extends Bu
     {
-        public static function call($method, $parameters = [])
+        public static function call($method, $parameters = [], $sessionHash = null)
         {
             $APIClass = get_called_class();
-            return new $APIClass($method, $parameters);
+            $sessionClass = self::SESSION_CLASS();
+            $session = $sessionClass::getByHash($sessionHash);
+            $currentUser = null;
+            if ($session) {
+                $currentUser = $session->getUser();
+            }
+            return new $APIClass($method, $parameters, $currentUser);
         }
 
         public static function API_ERROR_INVALID_CLASSNAME()
@@ -62,11 +68,17 @@
             return [];
         }
 
-        public function __construct($method, $parameters)
+        public static function SESSION_CLASS()
+        {
+            return "Bu\DefaultClass\Session";
+        }
+
+        public function __construct($method, $parameters, $currentUser = null)
         {
             $this->method = $method;
             $this->parameters = $parameters;
             $this->errors = [];
+            $this->currentUser = $currentUser;
 
             $this->setErrors();
             if (! $this->hasErrors()) {
@@ -82,6 +94,11 @@
         public function getParameters()
         {
             return $this->parameters;
+        }
+
+        public function getUser()
+        {
+            return $this->currentUser;
         }
 
         public function getParsedMethod()
@@ -179,7 +196,10 @@
                       }, ARRAY_FILTER_USE_BOTH);
                   }
                   $object = $classname::get($pkValue);
-                  return $object->getValues();
+                  if ($object) {
+                      return $object->getValues();
+                  } else {
+                  }
               },
               self::ACTION_MODIFY() => function ($classname, $parameters) {
               }

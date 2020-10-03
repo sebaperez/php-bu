@@ -10,4 +10,8 @@ class API extends \Bu\API
     {
         return [ "sample" => "Bu\Test\Sample\SampleClass" ];
     }
+    public static function SESSION_CLASS()
+    {
+        return "Bu\Test\Sample\Session";
+    }
 }

@@ -76,9 +76,9 @@ class APITest extends \Bu\Test\BuTest
         $this->assertAPIError(\Bu\API::API_ERROR_INVALID_PARAMETERS(), $this->getRandomString() . "/" . $this->getRandomString(), $this->getRandomString());
     }
 
-    public function getSampleAPICall($method, $parameters)
+    public function getSampleAPICall($method, $parameters, $sessionHash = null)
     {
-        $api = \Bu\Test\Sample\API::call($method, json_encode($parameters));
+        $api = \Bu\Test\Sample\API::call($method, json_encode($parameters), $sessionHash);
         $this->assertFalse($api->hasErrors());
         return $api;
     }
@@ -90,5 +90,20 @@ class APITest extends \Bu\Test\BuTest
         $result = $api->execute();
         $this->assertNotNull($result);
         $this->assertEquals($result["sampleclass_id"], $sample->getValue("sampleclass_id"));
+    }
+
+    public function test_call_with_session_hash()
+    {
+        $session = $this->getNew("Session");
+        $sample = $this->getNew("SampleClass");
+        $api = $this->getSampleAPICall("sample/view", [ "sampleclass_id" => $sample->getValue("sampleclass_id") ], $session->getValue("hash"));
+        $this->assertNotNull($api->getUser());
+        $this->assertEquals($session->getUser()->getValue("user_id"), $api->getUser()->getValue("user_id"));
+    }
+    public function test_call_with_invalid_session()
+    {
+        $sample = $this->getNew("SampleClass");
+        $api = $this->getSampleAPICall("sample/view", [ "sampleclass_id" => $sample->getValue("sampleclass_id") ], $this->getRandomString());
+        $this->assertNull($api->getUser());
     }
 }
