@@ -50,3 +50,11 @@ create table if not exists session (
 	end_date datetime,
 	primary key(session_id)
 );
+
+create table if not exists sessionchild (
+  sessionchild_id int auto_increment,
+  session_id int,
+  start_date datetime,
+  end_date datetime,
+  primary key (sessionchild_id)
+)

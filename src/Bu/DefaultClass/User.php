@@ -18,7 +18,8 @@ class User extends \Bu\Base
                 "account_id" => [
                     "type" => self::TYPE_INT(),
                     "fk" => [
-                        "class" => get_called_class()::GET_DEFAULT_FK_CLASS_ACCOUNT_ID()
+                        "class" => get_called_class()::GET_DEFAULT_FK_CLASS_ACCOUNT_ID(),
+                        "attr" => [ self::ATTR_FK_IS_OWNER() ]
                     ]
                 ],
                 "email" => [

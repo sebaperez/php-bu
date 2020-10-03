@@ -55,8 +55,7 @@ class SampleClass extends Base
                 ],
             ],
             "pk" => ["sampleclass_id"],
-            "attr" => [ self::ATTR_WITH_START_DATE(), self::ATTR_WITH_END_DATE() ],
-            "api_classname" => "sample"
+            "attr" => [ self::ATTR_WITH_START_DATE(), self::ATTR_WITH_END_DATE() ]
         ];
     }
 }

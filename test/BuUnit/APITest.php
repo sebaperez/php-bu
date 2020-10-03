@@ -79,17 +79,26 @@ class APITest extends \Bu\Test\BuTest
     public function getSampleAPICall($method, $parameters, $sessionHash = null)
     {
         $api = \Bu\Test\Sample\API::call($method, json_encode($parameters), $sessionHash);
-        $this->assertFalse($api->hasErrors());
+        $this->assertFalse($api->hasErrors(), json_encode($api->errors));
         return $api;
     }
 
     public function test_execute_method_view()
     {
-        $sample = $this->getNew("SampleClass");
-        $api = $this->getSampleAPICall("sample/view", [ "sampleclass_id" => $sample->getValue("sampleclass_id") ]);
+        $session = $this->getNew("Session");
+        $api = $this->getSampleAPICall("session/view", [ "session_id" => $session->getValue("session_id") ], $session->getValue("hash"));
         $result = $api->execute();
         $this->assertNotNull($result);
-        $this->assertEquals($result["sampleclass_id"], $sample->getValue("sampleclass_id"));
+        $this->assertEquals($result["session_id"], $session->getValue("session_id"));
+    }
+
+    public function test_execute_method_view_by_non_owner_user()
+    {
+        $session = $this->getNew("Session");
+        $session2 = $this->getNew("Session");
+        $api = $this->getSampleAPICall("session/view", [ "session_id" => $session->getValue("session_id") ], $session2->getValue("hash"));
+        $result = $api->execute();
+        $this->assertNull($result);
     }
 
     public function test_call_with_session_hash()
@@ -100,10 +109,51 @@ class APITest extends \Bu\Test\BuTest
         $this->assertNotNull($api->getUser());
         $this->assertEquals($session->getUser()->getValue("user_id"), $api->getUser()->getValue("user_id"));
     }
+
     public function test_call_with_invalid_session()
     {
         $sample = $this->getNew("SampleClass");
         $api = $this->getSampleAPICall("sample/view", [ "sampleclass_id" => $sample->getValue("sampleclass_id") ], $this->getRandomString());
         $this->assertNull($api->getUser());
+    }
+
+    public function test_get_object_owned_by_account()
+    {
+        $session = $this->getNew("Session");
+        $user = $session->getUser();
+        $api = $this->getSampleAPICall("user/view", [ "user_id" => $user->getValue("user_id") ], $session->getValue("hash"));
+        $result = $api->execute();
+        $this->assertNotNull($result);
+        $this->assertEquals($result["user_id"], $user->getValue("user_id"));
+    }
+
+    public function test_get_object_owned_by_account_from_non_owner_user()
+    {
+        $session = $this->getNew("Session");
+        $session2 = $this->getNew("Session");
+        $user = $session->getUser();
+        $api = $this->getSampleAPICall("user/view", [ "user_id" => $user->getValue("user_id") ], $session2->getValue("hash"));
+        $result = $api->execute();
+        $this->assertNull($result);
+    }
+
+    public function test_get_object_owned_by_custom_object()
+    {
+        $sessionchild = $this->getNew("SessionChild");
+        $sessionchild_session = $sessionchild->getObject("session_id");
+        $api = $this->getSampleAPICall("sessionchild/view", [ "sessionchild_id" => $sessionchild->getValue("sessionchild_id") ], $sessionchild_session->getValue("hash"));
+        $result = $api->execute();
+        $this->assertNotNull($result);
+        $this->assertEquals($result["sessionchild_id"], $sessionchild->getValue("sessionchild_id"));
+    }
+
+    public function test_get_object_owned_by_custom_object_from_non_owned_user()
+    {
+        $sessionchild = $this->getNew("SessionChild");
+        $sessionchild_session = $sessionchild->getObject("session_id");
+        $session2 = $this->getNew("Session");
+        $api = $this->getSampleAPICall("sessionchild/view", [ "sessionchild_id" => $sessionchild->getValue("sessionchild_id") ], $session2->getValue("hash"));
+        $result = $api->execute();
+        $this->assertNull($result);
     }
 }

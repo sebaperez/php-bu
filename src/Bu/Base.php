@@ -70,6 +70,13 @@
             return 2;
         }
 
+        // FK attributes
+
+        public static function ATTR_FK_IS_OWNER()
+        {
+            return 1;
+        }
+
         public static function getDef()
         {
             return get_called_class()::DEF();
@@ -377,6 +384,31 @@
                 }
             }
             return $fkFields;
+        }
+
+        public static function getOwnerClass()
+        {
+            $fields = self::getFields();
+            foreach ($fields as $field => $fieldDef) {
+                if (isset($fieldDef["fk"]) && isset($fieldDef["fk"]["attr"]) && in_array(self::ATTR_FK_IS_OWNER(), $fieldDef["fk"]["attr"])) {
+                    return $fieldDef["fk"]["class"];
+                }
+            }
+        }
+
+        public static function getOwnerField()
+        {
+            $fields = self::getFields();
+            foreach ($fields as $field => $fieldDef) {
+                if (isset($fieldDef["fk"]) && isset($fieldDef["fk"]["attr"]) && in_array(self::ATTR_FK_IS_OWNER(), $fieldDef["fk"]["attr"])) {
+                    return $field;
+                }
+            }
+        }
+
+        public static function isOwnedBy($classname)
+        {
+            return $classname === get_called_class()::getOwnerClass();
         }
 
         public static function hasSingleFKReference($class)

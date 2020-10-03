@@ -57,6 +57,13 @@
                         $user = $this->getNew("User");
                         return [ "user_id" => $user->getValue("user_id") ];
                     }
+                ],
+                "\Bu\Test\Sample\SessionChild" => [
+                  "key" => [ "sessionchild_id" ],
+                  "function" => function () {
+                      $session = $this->getNew("Session");
+                      return [ "session_id" => $session->getValue("session_id") ];
+                  }
                 ]
             ];
         }

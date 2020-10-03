@@ -7,7 +7,7 @@
         public static function call($method, $parameters = [], $sessionHash = null)
         {
             $APIClass = get_called_class();
-            $sessionClass = self::SESSION_CLASS();
+            $sessionClass = $APIClass::SESSION_CLASS();
             $session = $sessionClass::getByHash($sessionHash);
             $currentUser = null;
             if ($session) {
@@ -71,6 +71,14 @@
         public static function SESSION_CLASS()
         {
             return "Bu\DefaultClass\Session";
+        }
+        public static function USER_CLASS()
+        {
+            return "Bu\DefaultClass\User";
+        }
+        public static function ACCOUNT_CLASS()
+        {
+            return "Bu\DefaultClass\Account";
         }
 
         public function __construct($method, $parameters, $currentUser = null)
@@ -186,16 +194,7 @@
               self::ACTION_DEL() => function ($classname, $parameters) {
               },
               self::ACTION_VIEW() => function ($classname, $parameters) {
-                  if ($classname::hasSinglePK()) {
-                      $pkValue = $parameters[$classname::getPK()[0]];
-                  } else {
-                      $pkValue = array_filter($parameters, function ($key, $value) {
-                          if (in_array($key, $classname::getPK())) {
-                              return [ $key => $value ];
-                          }
-                      }, ARRAY_FILTER_USE_BOTH);
-                  }
-                  $object = $classname::get($pkValue);
+                  $object = $this->getObject($classname, $parameters);
                   if ($object) {
                       return $object->getValues();
                   } else {
@@ -207,9 +206,57 @@
             return $ACTION_FUNCTION[$action];
         }
 
+        public function actionAffectsExistingObject($action)
+        {
+            return $action !== self::ACTION_ADD();
+        }
+
+        public function getObject($classname, $parameters)
+        {
+            if ($classname::hasSinglePK()) {
+                $pkValue = $parameters[$classname::getPK()[0]];
+            } else {
+                $pkValue = array_filter($parameters, function ($key, $value) {
+                    if (in_array($key, $classname::getPK())) {
+                        return [ $key => $value ];
+                    }
+                }, ARRAY_FILTER_USE_BOTH);
+            }
+            return $classname::get($pkValue);
+        }
+
+        public static function isClassOwnedByUser($classname)
+        {
+            return $classname::isOwnedBy(get_called_class()::USER_CLASS());
+        }
+
+        public static function isClassOwnedByAccount($classname)
+        {
+            return $classname::isOwnedBy(get_called_class()::ACCOUNT_CLASS());
+        }
+
+        public function hasUserAccessToObject($object)
+        {
+            $classname = $object->getClassName();
+            $ownerField = $classname::getOwnerField();
+            if (self::isClassOwnedByUser($classname)) {
+                return $object->getValue($ownerField) === $this->getUser()->getValue($ownerField);
+            } elseif (self::isClassOwnedByAccount($classname)) {
+                return $object->getValue($ownerField) === $this->getUser()->getObject("account_id")->getValue($ownerField);
+            } elseif ($ownerField) {
+                return self::hasUserAccessToObject($object->getObject($ownerField));
+            }
+            return false;
+        }
+
         public function executeMethod($classname, $action, $parameters)
         {
-            return $this->getActionFunction($action)($classname, $parameters);
+            if ($this->actionAffectsExistingObject($action)) {
+                $object = $this->getObject($classname, $parameters);
+                if ($object && $this->hasUserAccessToObject($object)) {
+                    return $this->getActionFunction($action)($classname, $parameters);
+                }
+            }
         }
 
         public static function run($method, $parameters, $output = null)

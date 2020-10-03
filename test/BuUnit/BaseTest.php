@@ -301,6 +301,18 @@ class BaseTest extends \Bu\Test\BuTest
         $this->assertEquals($sampleclassmultiplepk->getObject("id2")->getValue("sampleclass_id"), $sampleobject2->getValue("sampleclass_id"));
     }
 
+    public function test_get_owner()
+    {
+        $sampleobject1 = $this->getNew("SampleClass");
+        $sampleobject2 = $this->getNew("SampleClass");
+        $sampleclassmultiplepk = $this->getNew("SampleClassMultiplePK", [
+          "id1" => $sampleobject1->getValue("sampleclass_id"),
+          "id2" => $sampleobject2->getValue("sampleclass_id")
+        ]);
+        $this->assertNull(\Bu\Test\Sample\SampleClass::getOwnerClass());
+        $this->assertEquals("Bu\Test\Sample\SampleClass", \Bu\Test\Sample\SampleClassMultiplePK::getOwnerClass());
+    }
+
     public function test_find_objects()
     {
         $sampleobject1 = $this->getNew("SampleClass");
