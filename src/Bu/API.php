@@ -63,9 +63,13 @@
         {
             return "view";
         }
-        public static function ACTION_MODIFY()
+        public static function ACTION_EDIT()
         {
-            return "modify";
+            return "edit";
+        }
+        public static function ACTION_LIST()
+        {
+            return "list";
         }
 
         public static function VALID_ACTIONS()
@@ -74,7 +78,8 @@
             self::ACTION_ADD(),
             self::ACTION_DEL(),
             self::ACTION_VIEW(),
-            self::ACTION_MODIFY()
+            self::ACTION_EDIT(),
+            self::ACTION_LIST()
           ];
         }
 
@@ -198,27 +203,6 @@
             }
         }
 
-        public function getActionFunction($action)
-        {
-            $ACTION_FUNCTION = [
-              self::ACTION_ADD() => function ($classname, $parameters) {
-              },
-              self::ACTION_DEL() => function ($classname, $parameters) {
-              },
-              self::ACTION_VIEW() => function ($classname, $parameters) {
-                  $object = $this->getObject($classname, $parameters);
-                  if ($object) {
-                      return $this->getResponseSuccess($object->getValues());
-                  } else {
-                      return $this->getResponseError(self::API_ERROR_FORBIDDEN());
-                  }
-              },
-              self::ACTION_MODIFY() => function ($classname, $parameters) {
-              }
-            ];
-            return $ACTION_FUNCTION[$action];
-        }
-
         public function actionAffectsExistingObject($action)
         {
             return $action !== self::ACTION_ADD();
@@ -297,5 +281,29 @@
             if (! $output) {
                 $output = self::API_OUTPUT_JSON();
             }
+        }
+
+        public function getActionFunction($action)
+        {
+            $ACTION_FUNCTION = [
+              self::ACTION_ADD() => function ($classname, $parameters) {
+              },
+              self::ACTION_DEL() => function ($classname, $parameters) {
+              },
+              self::ACTION_VIEW() => function ($classname, $parameters) {
+                  $object = $this->getObject($classname, $parameters);
+                  if ($object) {
+                      return $this->getResponseSuccess($object->getValues());
+                  } else {
+                      return $this->getResponseError(self::API_ERROR_FORBIDDEN());
+                  }
+              },
+              self::ACTION_EDIT() => function ($classname, $parameters) {
+              },
+              self::ACTION_LIST() => function ($classname, $parameters) {
+              }
+            ];
+            
+            return $ACTION_FUNCTION[$action];
         }
     }
