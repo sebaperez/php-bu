@@ -46,6 +46,11 @@
             return "API_ERROR_FORBIDDEN";
         }
 
+        public static function API_ERROR_INTERNAL_ERROR()
+        {
+            return "API_ERROR_INTERNAL_ERROR";
+        }
+
         public static function API_OUTPUT_JSON()
         {
             return "json";
@@ -255,6 +260,8 @@
                 } else {
                     return $this->getResponseError(self::API_ERROR_FORBIDDEN());
                 }
+            } else {
+                return $this->getActionFunction($action)($classname, $parameters);
             }
         }
 
@@ -287,6 +294,17 @@
         {
             $ACTION_FUNCTION = [
               self::ACTION_ADD() => function ($classname, $parameters) {
+                  $validationErrors = $classname::validate($parameters);
+                  if (count($validationErrors) === 0) {
+                      return $this->getResponseError($validationErrors);
+                  } else {
+                      $object = $classname::add($parameters);
+                      if ($object) {
+                          return $this->getResponseSuccess($object->getValues());
+                      } else {
+                          return $this->getResponseError(self::API_ERROR_INTERNAL_ERROR());
+                      }
+                  }
               },
               self::ACTION_DEL() => function ($classname, $parameters) {
               },
@@ -303,7 +321,7 @@
               self::ACTION_LIST() => function ($classname, $parameters) {
               }
             ];
-            
+
             return $ACTION_FUNCTION[$action];
         }
     }

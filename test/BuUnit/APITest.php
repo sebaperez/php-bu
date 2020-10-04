@@ -157,4 +157,21 @@ class APITest extends \Bu\Test\BuTest
         $session2 = $this->getNew("Session");
         $this->assertAPIError(\Bu\API::API_ERROR_FORBIDDEN(), "sessionchild/view", [ "sessionchild_id" => $sessionchild->getValue("sessionchild_id") ], $session2->getValue("hash"));
     }
+
+    public function test_add_object()
+    {
+        $session = $this->getNew("Session");
+        $user = $session->getUser()->getObject("account_id");
+        $NAME = $this->getRandomString();
+        $EMAIL = $this->getRandomEmail();
+        $PASSWORD = $this->getRandomString();
+        $result = $this->assertAPISuccess("user/add", [
+          "email" => $EMAIL,
+          "name" => $NAME,
+          "password" => $PASSWORD
+        ], $session->getValue("hash"));
+        $newUser = \Bu\Test\Sample\User::get($result["user_id"]);
+        $this->assertEquals($NAME, $newUser->getValue("name"));
+        $this->assertEquals($EMAIL, $newUser->getValue("email"));
+    }
 }
