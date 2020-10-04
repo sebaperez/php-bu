@@ -54,11 +54,31 @@ class APITest extends \Bu\Test\BuTest
         $this->assertTrue(\Bu\Test\Sample\API::isValidParameters("{}"));
     }
 
-    public function assertAPIError($error, $method, $parameters = null)
+    public function getAPICall($method, $parameters, $sessionHash)
     {
-        $api = \Bu\API::call($method, $parameters);
-        $this->assertTrue($api->hasErrors());
-        $this->assertContains($error, $api->getErrors());
+        return \Bu\Test\Sample\API::call($method, json_encode($parameters, true), $sessionHash);
+    }
+
+    public function getAPIExecutionResponse($method, $parameters, $sessionHash)
+    {
+        $api = $this->getAPICall($method, $parameters, $sessionHash);
+        return $api->execute();
+    }
+
+    public function assertAPIError($error, $method, $parameters = null, $sessionHash = null)
+    {
+        $result = $this->getAPIExecutionResponse($method, $parameters, $sessionHash);
+        $this->assertIsArray($result);
+        $this->assertEquals(\Bu\Test\Sample\API::API_STATUS_ERROR(), $result["status"]);
+        $this->assertEquals($error, $result["data"]);
+    }
+
+    public function assertAPISuccess($method, $parameters = null, $sessionHash = null)
+    {
+        $result = $this->getAPIExecutionResponse($method, $parameters, $sessionHash);
+        $this->assertIsArray($result);
+        $this->assertEquals(\Bu\Test\Sample\API::API_STATUS_SUCCESS(), $result["status"]);
+        return $result["data"];
     }
 
     public function test_error_invalid_class()
@@ -73,22 +93,13 @@ class APITest extends \Bu\Test\BuTest
 
     public function test_error_invalid_parameters()
     {
-        $this->assertAPIError(\Bu\API::API_ERROR_INVALID_PARAMETERS(), $this->getRandomString() . "/" . $this->getRandomString(), $this->getRandomString());
-    }
-
-    public function getSampleAPICall($method, $parameters, $sessionHash = null)
-    {
-        $api = \Bu\Test\Sample\API::call($method, json_encode($parameters), $sessionHash);
-        $this->assertFalse($api->hasErrors(), json_encode($api->errors));
-        return $api;
+        $this->assertAPIError(\Bu\API::API_ERROR_INVALID_PARAMETERS(), "sample/view", $this->getRandomString());
     }
 
     public function test_execute_method_view()
     {
         $session = $this->getNew("Session");
-        $api = $this->getSampleAPICall("session/view", [ "session_id" => $session->getValue("session_id") ], $session->getValue("hash"));
-        $result = $api->execute();
-        $this->assertNotNull($result);
+        $result = $this->assertAPISuccess("session/view", [ "session_id" => $session->getValue("session_id") ], $session->getValue("hash"));
         $this->assertEquals($result["session_id"], $session->getValue("session_id"));
     }
 
@@ -96,16 +107,14 @@ class APITest extends \Bu\Test\BuTest
     {
         $session = $this->getNew("Session");
         $session2 = $this->getNew("Session");
-        $api = $this->getSampleAPICall("session/view", [ "session_id" => $session->getValue("session_id") ], $session2->getValue("hash"));
-        $result = $api->execute();
-        $this->assertNull($result);
+        $this->assertAPIError(\Bu\API::API_ERROR_FORBIDDEN(), "session/view", [ "session_id" => $session->getValue("session_id") ], $session2->getValue("hash"));
     }
 
     public function test_call_with_session_hash()
     {
         $session = $this->getNew("Session");
         $sample = $this->getNew("SampleClass");
-        $api = $this->getSampleAPICall("sample/view", [ "sampleclass_id" => $sample->getValue("sampleclass_id") ], $session->getValue("hash"));
+        $api = $this->getAPICall("sample/view", [ "sampleclass_id" => $sample->getValue("sampleclass_id") ], $session->getValue("hash"));
         $this->assertNotNull($api->getUser());
         $this->assertEquals($session->getUser()->getValue("user_id"), $api->getUser()->getValue("user_id"));
     }
@@ -113,7 +122,7 @@ class APITest extends \Bu\Test\BuTest
     public function test_call_with_invalid_session()
     {
         $sample = $this->getNew("SampleClass");
-        $api = $this->getSampleAPICall("sample/view", [ "sampleclass_id" => $sample->getValue("sampleclass_id") ], $this->getRandomString());
+        $api = $this->getAPICall("sample/view", [ "sampleclass_id" => $sample->getValue("sampleclass_id") ], $this->getRandomString());
         $this->assertNull($api->getUser());
     }
 
@@ -121,9 +130,7 @@ class APITest extends \Bu\Test\BuTest
     {
         $session = $this->getNew("Session");
         $user = $session->getUser();
-        $api = $this->getSampleAPICall("user/view", [ "user_id" => $user->getValue("user_id") ], $session->getValue("hash"));
-        $result = $api->execute();
-        $this->assertNotNull($result);
+        $result = $this->assertAPISuccess("user/view", [ "user_id" => $user->getValue("user_id") ], $session->getValue("hash"));
         $this->assertEquals($result["user_id"], $user->getValue("user_id"));
     }
 
@@ -132,18 +139,14 @@ class APITest extends \Bu\Test\BuTest
         $session = $this->getNew("Session");
         $session2 = $this->getNew("Session");
         $user = $session->getUser();
-        $api = $this->getSampleAPICall("user/view", [ "user_id" => $user->getValue("user_id") ], $session2->getValue("hash"));
-        $result = $api->execute();
-        $this->assertNull($result);
+        $this->assertAPIError(\Bu\API::API_ERROR_FORBIDDEN(), "user/view", [ "user_id" => $user->getValue("user_id") ], $session2->getValue("hash"));
     }
 
     public function test_get_object_owned_by_custom_object()
     {
         $sessionchild = $this->getNew("SessionChild");
         $sessionchild_session = $sessionchild->getObject("session_id");
-        $api = $this->getSampleAPICall("sessionchild/view", [ "sessionchild_id" => $sessionchild->getValue("sessionchild_id") ], $sessionchild_session->getValue("hash"));
-        $result = $api->execute();
-        $this->assertNotNull($result);
+        $result = $this->assertAPISuccess("sessionchild/view", [ "sessionchild_id" => $sessionchild->getValue("sessionchild_id") ], $sessionchild_session->getValue("hash"));
         $this->assertEquals($result["sessionchild_id"], $sessionchild->getValue("sessionchild_id"));
     }
 
@@ -152,8 +155,6 @@ class APITest extends \Bu\Test\BuTest
         $sessionchild = $this->getNew("SessionChild");
         $sessionchild_session = $sessionchild->getObject("session_id");
         $session2 = $this->getNew("Session");
-        $api = $this->getSampleAPICall("sessionchild/view", [ "sessionchild_id" => $sessionchild->getValue("sessionchild_id") ], $session2->getValue("hash"));
-        $result = $api->execute();
-        $this->assertNull($result);
+        $this->assertAPIError(\Bu\API::API_ERROR_FORBIDDEN(), "sessionchild/view", [ "sessionchild_id" => $sessionchild->getValue("sessionchild_id") ], $session2->getValue("hash"));
     }
 }

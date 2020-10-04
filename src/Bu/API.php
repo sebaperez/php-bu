@@ -16,6 +16,16 @@
             return new $APIClass($method, $parameters, $currentUser);
         }
 
+        public static function API_STATUS_ERROR()
+        {
+            return "error";
+        }
+
+        public static function API_STATUS_SUCCESS()
+        {
+            return "success";
+        }
+
         public static function API_ERROR_INVALID_CLASSNAME()
         {
             return "API_ERROR_INVALID_CLASSNAME";
@@ -29,6 +39,11 @@
         public static function API_ERROR_INVALID_PARAMETERS()
         {
             return "API_ERROR_INVALID_PARAMETERS";
+        }
+
+        public static function API_ERROR_FORBIDDEN()
+        {
+            return "API_ERROR_FORBIDDEN";
         }
 
         public static function API_OUTPUT_JSON()
@@ -88,8 +103,7 @@
             $this->errors = [];
             $this->currentUser = $currentUser;
 
-            $this->setErrors();
-            if (! $this->hasErrors()) {
+            if (! $this->hasError()) {
                 $this->parameters = json_decode($parameters, true);
             }
         }
@@ -151,27 +165,23 @@
             return false;
         }
 
-        public function hasErrors()
+        public function hasError()
         {
-            return (bool)count($this->getErrors());
+            return (bool)$this->getError();
         }
 
-        public function getErrors()
-        {
-            return $this->errors;
-        }
-
-        public function setErrors()
+        public function getError()
         {
             if (! self::isValidClassKey($this->getClassKey())) {
-                array_push($this->errors, self::API_ERROR_INVALID_CLASSNAME());
+                return self::API_ERROR_INVALID_CLASSNAME();
             }
             if (! self::isValidAction($this->getAction())) {
-                array_push($this->errors, self::API_ERROR_INVALID_ACTION());
+                return self::API_ERROR_INVALID_ACTION();
             }
             if (! self::isValidParameters($this->getParameters())) {
-                array_push($this->errors, self::API_ERROR_INVALID_PARAMETERS());
+                return self::API_ERROR_INVALID_PARAMETERS();
             }
+            return false;
         }
 
         public function getClassName()
@@ -181,8 +191,10 @@
 
         public function execute()
         {
-            if (! $this->hasErrors()) {
+            if (! $this->hasError()) {
                 return $this->executeMethod($this->getClassName(), $this->getAction(), $this->getParameters());
+            } else {
+                return $this->getResponseError($this->getError());
             }
         }
 
@@ -196,8 +208,9 @@
               self::ACTION_VIEW() => function ($classname, $parameters) {
                   $object = $this->getObject($classname, $parameters);
                   if ($object) {
-                      return $object->getValues();
+                      return $this->getResponseSuccess($object->getValues());
                   } else {
+                      return $this->getResponseError(self::API_ERROR_FORBIDDEN());
                   }
               },
               self::ACTION_MODIFY() => function ($classname, $parameters) {
@@ -255,8 +268,28 @@
                 $object = $this->getObject($classname, $parameters);
                 if ($object && $this->hasUserAccessToObject($object)) {
                     return $this->getActionFunction($action)($classname, $parameters);
+                } else {
+                    return $this->getResponseError(self::API_ERROR_FORBIDDEN());
                 }
             }
+        }
+
+        public function getResponseError($msg)
+        {
+            return $this->getResponse(self::API_STATUS_ERROR(), $msg);
+        }
+
+        public function getResponseSuccess($msg)
+        {
+            return $this->getResponse(self::API_STATUS_SUCCESS(), $msg);
+        }
+
+        public function getResponse($status, $msg)
+        {
+            return [
+              "status" => $status,
+              "data" => $msg
+          ];
         }
 
         public static function run($method, $parameters, $output = null)
