@@ -67,4 +67,15 @@ class DefaultTest extends \Bu\Test\BuTest
         $_session = \Bu\Test\Sample\Session::getByHash($session->getValue("hash"));
         $this->assertNull($_session);
     }
+
+    public function test_get_editable_fields_user()
+    {
+        $fields = \Bu\Test\Sample\User::getEditableFields();
+        $this->assertEquals([
+          "email",
+          "name",
+          "lastname",
+          "password"
+      ], $fields);
+    }
 }

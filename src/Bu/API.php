@@ -65,9 +65,9 @@
         {
             return "add";
         }
-        public static function ACTION_DEL()
+        public static function ACTION_DELETE()
         {
-            return "del";
+            return "delete";
         }
         public static function ACTION_VIEW()
         {
@@ -86,7 +86,7 @@
         {
             return [
             self::ACTION_ADD(),
-            self::ACTION_DEL(),
+            self::ACTION_DELETE(),
             self::ACTION_VIEW(),
             self::ACTION_EDIT(),
             self::ACTION_LIST()
@@ -322,7 +322,17 @@
                       }
                   }
               },
-              self::ACTION_DEL() => function ($classname, $parameters) {
+              self::ACTION_DELETE() => function ($classname, $parameters) {
+                  $object = $this->getObject($classname, $parameters);
+                  if ($object) {
+                      if ($object->delete()) {
+                          return $this->getResponseSuccess($object->getValues());
+                      } else {
+                          return $this->getResponseError(self::API_ERROR_INTERNAL_ERROR());
+                      }
+                  } else {
+                      return $this->getResponseError(self::API_ERROR_FORBIDDEN());
+                  }
               },
               self::ACTION_VIEW() => function ($classname, $parameters) {
                   $object = $this->getObject($classname, $parameters);
@@ -333,6 +343,26 @@
                   }
               },
               self::ACTION_EDIT() => function ($classname, $parameters) {
+                  $object = $this->getObject($classname, $parameters);
+                  if ($object) {
+                      $validationErrors = $classname::validateFields($parameters);
+                      if (count($validationErrors) !== 0) {
+                          return $this->getResponseError(self::API_ERROR_VALIDATION(), $validationErrors);
+                      } else {
+                          $editableFields = $classname::getEditableFields();
+                          foreach ($parameters as $field => $value) {
+                              if (in_array($field, $editableFields)) {
+                                  if (! $object->update($field, $value)) {
+                                      return $this->getResponseError(self::API_ERROR_INTERNAL_ERROR());
+                                  }
+                              }
+                          }
+                          $object = $this->getObject($classname, $parameters);
+                          return $this->getResponseSuccess($object->getValues());
+                      }
+                  } else {
+                      return $this->getResponseError(self::API_ERROR_FORBIDDEN());
+                  }
               },
               self::ACTION_LIST() => function ($classname, $parameters) {
               }

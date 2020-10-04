@@ -94,7 +94,10 @@
 
         public static function getField($field)
         {
-            return self::getFields()[$field];
+            $fields = self::getFields();
+            if (isset($fields[$field])) {
+                return $fields[$field];
+            }
         }
 
         public static function getFieldType($field)
@@ -206,6 +209,18 @@
                 return true;
             }
             return false;
+        }
+
+        public static function isEditableField($fieldName)
+        {
+            if (in_array($fieldName, self::getPK())) {
+                return false;
+            } elseif (in_array($fieldName, array_keys(self::getCommonFieldSymbols()))) {
+                return false;
+            } elseif (self::isFieldFK($fieldName)) {
+                return false;
+            }
+            return true;
         }
 
         public static function getMandatoryFields()
@@ -443,5 +458,17 @@
         public static function getAPIDefaultValues($user)
         {
             return [];
+        }
+
+        public static function getEditableFields()
+        {
+            $response = [];
+            $fields = self::getFieldNames();
+            foreach ($fields as $field) {
+                if (self::isEditableField($field)) {
+                    array_push($response, $field);
+                }
+            }
+            return $response;
         }
     }

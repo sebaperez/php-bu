@@ -162,7 +162,6 @@ class APITest extends \Bu\Test\BuTest
     public function test_add_object()
     {
         $session = $this->getNew("Session");
-        $user = $session->getUser()->getObject("account_id");
         $NAME = $this->getRandomString();
         $EMAIL = $this->getRandomEmail();
         $result = $this->assertAPISuccess("user/add", [
@@ -175,12 +174,12 @@ class APITest extends \Bu\Test\BuTest
         $this->assertNotNull($newUser);
         $this->assertEquals($NAME, $newUser->getValue("name"));
         $this->assertEquals($EMAIL, $newUser->getValue("email"));
+        $this->assertNull($result["end_date"]);
     }
 
     public function test_add_validation_fails()
     {
         $session = $this->getNew("Session");
-        $user = $session->getUser()->getObject("account_id");
         $NAME = $this->getRandomString();
         $result = $this->assertAPIError(\Bu\API::API_ERROR_VALIDATION(), "user/add", [
           "name" => $NAME,
@@ -188,5 +187,48 @@ class APITest extends \Bu\Test\BuTest
         ], $session->getValue("hash"));
         $this->assertCount(1, $result["data"]);
         $this->assertEquals(\Bu\Validate::VALIDATE_ERROR_MISSING_FIELD(), $result["data"]["email"]["error"]);
+    }
+
+    public function test_delete_object()
+    {
+        $session = $this->getNew("Session");
+        $user = $session->getUser();
+        $result = $this->assertAPISuccess("user/delete", [
+          "user_id" => $user->getValue("user_id")
+        ], $session->getValue("hash"));
+        $this->assertEquals($user->getValue("user_id"), $result["user_id"]);
+        $this->assertNotNull($result["end_date"]);
+    }
+
+    public function test_edit_object()
+    {
+        $session = $this->getNew("Session");
+        $user = $session->getUser();
+        $NAME = $this->getRandomString();
+        $EMAIL = $this->getRandomEmail();
+        $result = $this->assertAPISuccess("user/edit", [
+          "user_id" => $user->getValue("user_id"),
+          "name" => $NAME,
+          "email" => $EMAIL
+        ], $session->getValue("hash"));
+        $this->assertEquals($NAME, $result["name"]);
+        $this->assertEquals($EMAIL, $result["email"]);
+    }
+
+    public function test_edit_object_no_update_non_editable_fields()
+    {
+        $session = $this->getNew("Session");
+        $user = $session->getUser();
+        $NAME = $this->getRandomString();
+        $EMAIL = $this->getRandomEmail();
+        $result = $this->assertAPISuccess("user/edit", [
+          "user_id" => $user->getValue("user_id"),
+          "name" => $NAME,
+          "email" => $EMAIL,
+          "start_date" => "2020-01-01 00:00:00"
+        ], $session->getValue("hash"));
+        $this->assertEquals($NAME, $result["name"]);
+        $this->assertEquals($EMAIL, $result["email"]);
+        $this->assertEquals($user->getValue("start_date"), $result["start_date"]);
     }
 }

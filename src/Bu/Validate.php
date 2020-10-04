@@ -76,6 +76,10 @@
         {
             return "ERROR_DATE";
         }
+        public static function VALIDATE_ERROR_FORBIDDEN()
+        {
+            return "FORBIDDEN";
+        }
 
         public static function setError($response, $field, $error, $details = null)
         {
@@ -93,7 +97,8 @@
 
         public static function hasValidate($field)
         {
-            return isset(self::getField($field)["validate"]);
+            $fieldDef = self::getField($field);
+            return $fieldDef && isset($fieldDef["validate"]);
         }
 
         public static function hasValidateType($field)
@@ -223,6 +228,80 @@
             return true;
         }
 
+        public static function validateField($field, $value)
+        {
+            $response = [];
+            if (self::hasValidateType(($field))) {
+                $type = self::getValidateType($field);
+                $validateType = self::validateType($type, $value);
+                if (! $validateType) {
+                    $response = self::setError($response, $field, self::VALIDATE_ERROR_TYPE(), [
+                      "type" => $type
+                  ]);
+                }
+            }
+
+            if (self::hasValidateLength($field)) {
+                $lengthError = [];
+                if (self::hasValidateMinLength($field)) {
+                    $minLength = self::getValidateMinLength($field);
+                    if ($minLength !== false && strlen($value) < $minLength) {
+                        $lengthError["min_length"] = $minLength;
+                    }
+                }
+                if (self::hasValidateMaxLength($field)) {
+                    $maxLength = self::getValidateMaxLength($field);
+                    if ($maxLength !== false && strlen($value) > $maxLength) {
+                        $lengthError["max_length"] = $maxLength;
+                    }
+                }
+                if (! empty($lengthError)) {
+                    $response = self::setError($response, $field, self::VALIDATE_ERROR_LENGTH(), $lengthError);
+                }
+            }
+
+            $dateError = [];
+            if (self::hasDateOrDatetimeValidate($field)) {
+                if (self::hasDateValidate($field)) {
+                    $format = "Y-m-d";
+                } elseif (self::hasTimeValidate($field)) {
+                    $format = "H:i:s";
+                }
+
+                if (self::hasValidateDateMin($field)) {
+                    $min_date = self::getValidateDateMin($field);
+                    if (new \DateTime($min_date) > new \DateTime($value)) {
+                        $dateError["min_date"] = $min_date;
+                    }
+                }
+                if (self::hasValidateDateMax($field)) {
+                    $max_date = self::getValidateDateMax($field);
+                    if (new \DateTime($max_date) < new \DateTime($value)) {
+                        $dateError["max_date"] = $max_date;
+                    }
+                }
+
+                if (! empty($dateError)) {
+                    $response = self::setError($response, $field, self::VALIDATE_ERROR_DATE(), $dateError);
+                }
+            }
+            return $response;
+        }
+
+        public static function validateFields($values = [])
+        {
+            $response = [];
+            foreach ($values as $field => $value) {
+                if (self::hasValidate($field)) {
+                    $_response = self::validateField($field, $value);
+                    if (count($_response)) {
+                        $response = array_merge($response, $_response);
+                    }
+                }
+            }
+            return $response;
+        }
+
         public static function validate($values = [])
         {
             $response = [];
@@ -234,63 +313,9 @@
                 }
             }
 
-            foreach ($values as $field => $value) {
-                if (self::hasValidate($field)) {
-                    if (self::hasValidateType(($field))) {
-                        $type = self::getValidateType($field);
-                        $validateType = self::validateType($type, $value);
-                        if (! $validateType) {
-                            $response = self::setError($response, $field, self::VALIDATE_ERROR_TYPE(), [
-                                "type" => $type
-                            ]);
-                        }
-                    }
-
-                    if (self::hasValidateLength($field)) {
-                        $lengthError = [];
-                        if (self::hasValidateMinLength($field)) {
-                            $minLength = self::getValidateMinLength($field);
-                            if ($minLength !== false && strlen($value) < $minLength) {
-                                $lengthError["min_length"] = $minLength;
-                            }
-                        }
-                        if (self::hasValidateMaxLength($field)) {
-                            $maxLength = self::getValidateMaxLength($field);
-                            if ($maxLength !== false && strlen($value) > $maxLength) {
-                                $lengthError["max_length"] = $maxLength;
-                            }
-                        }
-                        if (! empty($lengthError)) {
-                            $response = self::setError($response, $field, self::VALIDATE_ERROR_LENGTH(), $lengthError);
-                        }
-                    }
-
-                    $dateError = [];
-                    if (self::hasDateOrDatetimeValidate($field)) {
-                        if (self::hasDateValidate($field)) {
-                            $format = "Y-m-d";
-                        } elseif (self::hasTimeValidate($field)) {
-                            $format = "H:i:s";
-                        }
-
-                        if (self::hasValidateDateMin($field)) {
-                            $min_date = self::getValidateDateMin($field);
-                            if (new \DateTime($min_date) > new \DateTime($value)) {
-                                $dateError["min_date"] = $min_date;
-                            }
-                        }
-                        if (self::hasValidateDateMax($field)) {
-                            $max_date = self::getValidateDateMax($field);
-                            if (new \DateTime($max_date) < new \DateTime($value)) {
-                                $dateError["max_date"] = $max_date;
-                            }
-                        }
-
-                        if (! empty($dateError)) {
-                            $response = self::setError($response, $field, self::VALIDATE_ERROR_DATE(), $dateError);
-                        }
-                    }
-                }
+            $_response = self::validateFields($values);
+            if (count($_response)) {
+                $response = array_merge($response, $_response);
             }
 
             return $response;
