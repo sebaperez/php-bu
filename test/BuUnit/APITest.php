@@ -231,4 +231,23 @@ class APITest extends \Bu\Test\BuTest
         $this->assertEquals($EMAIL, $result["email"]);
         $this->assertEquals($user->getValue("start_date"), $result["start_date"]);
     }
+
+    public function test_edit_object_no_update_fk()
+    {
+        $session = $this->getNew("Session");
+        $account = $this->getNew("Account");
+        $user = $session->getUser();
+        $NAME = $this->getRandomString();
+        $EMAIL = $this->getRandomEmail();
+        $result = $this->assertAPISuccess("user/edit", [
+          "user_id" => $user->getValue("user_id"),
+          "name" => $NAME,
+          "email" => $EMAIL,
+          "account_id" => $account->getValue("account_id")
+        ], $session->getValue("hash"));
+        $this->assertEquals($NAME, $result["name"]);
+        $this->assertEquals($EMAIL, $result["email"]);
+        $this->assertEquals($user->getValue("account_id"), $result["account_id"]);
+        $this->assertEquals($user->getValue("start_date"), $result["start_date"]);
+    }
 }
