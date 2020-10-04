@@ -70,14 +70,15 @@ class APITest extends \Bu\Test\BuTest
         $result = $this->getAPIExecutionResponse($method, $parameters, $sessionHash);
         $this->assertIsArray($result);
         $this->assertEquals(\Bu\Test\Sample\API::API_STATUS_ERROR(), $result["status"]);
-        $this->assertEquals($error, $result["data"]);
+        $this->assertEquals($error, $result["code"]);
+        return $result;
     }
 
     public function assertAPISuccess($method, $parameters = null, $sessionHash = null)
     {
         $result = $this->getAPIExecutionResponse($method, $parameters, $sessionHash);
         $this->assertIsArray($result);
-        $this->assertEquals(\Bu\Test\Sample\API::API_STATUS_SUCCESS(), $result["status"]);
+        $this->assertEquals(\Bu\Test\Sample\API::API_STATUS_SUCCESS(), $result["status"], json_encode($result));
         return $result["data"];
     }
 
@@ -164,14 +165,28 @@ class APITest extends \Bu\Test\BuTest
         $user = $session->getUser()->getObject("account_id");
         $NAME = $this->getRandomString();
         $EMAIL = $this->getRandomEmail();
-        $PASSWORD = $this->getRandomString();
         $result = $this->assertAPISuccess("user/add", [
           "email" => $EMAIL,
           "name" => $NAME,
-          "password" => $PASSWORD
+          "password" => $this->getRandomString()
         ], $session->getValue("hash"));
+        $this->assertNotNull($result["user_id"]);
         $newUser = \Bu\Test\Sample\User::get($result["user_id"]);
+        $this->assertNotNull($newUser);
         $this->assertEquals($NAME, $newUser->getValue("name"));
         $this->assertEquals($EMAIL, $newUser->getValue("email"));
+    }
+
+    public function test_add_validation_fails()
+    {
+        $session = $this->getNew("Session");
+        $user = $session->getUser()->getObject("account_id");
+        $NAME = $this->getRandomString();
+        $result = $this->assertAPIError(\Bu\API::API_ERROR_VALIDATION(), "user/add", [
+          "name" => $NAME,
+          "password" => $this->getRandomString()
+        ], $session->getValue("hash"));
+        $this->assertCount(1, $result["data"]);
+        $this->assertEquals(\Bu\Validate::VALIDATE_ERROR_MISSING_FIELD(), $result["data"]["email"]["error"]);
     }
 }

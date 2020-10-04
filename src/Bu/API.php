@@ -51,6 +51,11 @@
             return "API_ERROR_INTERNAL_ERROR";
         }
 
+        public static function API_ERROR_VALIDATION()
+        {
+            return "API_ERROR_VALIDATION";
+        }
+
         public static function API_OUTPUT_JSON()
         {
             return "json";
@@ -261,26 +266,37 @@
                     return $this->getResponseError(self::API_ERROR_FORBIDDEN());
                 }
             } else {
+                $parameters = $this->fillDefaultValues($classname, $parameters);
                 return $this->getActionFunction($action)($classname, $parameters);
             }
         }
 
-        public function getResponseError($msg)
+        public function fillDefaultValues($classname, $parameters)
         {
-            return $this->getResponse(self::API_STATUS_ERROR(), $msg);
+            $defaultValues = $classname::getAPIDefaultValues($this->getUser());
+            return array_merge($parameters, $defaultValues);
+        }
+
+        public function getResponseError($code, $msg = null)
+        {
+            return $this->getResponse(self::API_STATUS_ERROR(), $code, $msg);
         }
 
         public function getResponseSuccess($msg)
         {
-            return $this->getResponse(self::API_STATUS_SUCCESS(), $msg);
+            return $this->getResponse(self::API_STATUS_SUCCESS(), null, $msg);
         }
 
-        public function getResponse($status, $msg)
+        public function getResponse($status, $code = null, $msg)
         {
-            return [
-              "status" => $status,
-              "data" => $msg
-          ];
+            $data = [ "status" => $status ];
+            if ($code) {
+                $data["code"] = $code;
+            }
+            if ($msg) {
+                $data["data"] = $msg;
+            }
+            return $data;
         }
 
         public static function run($method, $parameters, $output = null)
@@ -295,8 +311,8 @@
             $ACTION_FUNCTION = [
               self::ACTION_ADD() => function ($classname, $parameters) {
                   $validationErrors = $classname::validate($parameters);
-                  if (count($validationErrors) === 0) {
-                      return $this->getResponseError($validationErrors);
+                  if (count($validationErrors) !== 0) {
+                      return $this->getResponseError(self::API_ERROR_VALIDATION(), $validationErrors);
                   } else {
                       $object = $classname::add($parameters);
                       if ($object) {

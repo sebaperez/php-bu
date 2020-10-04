@@ -71,4 +71,11 @@ class User extends \Bu\Base
             return $session;
         }
     }
+
+    public static function getAPIDefaultValues($user)
+    {
+        return [
+          "account_id" => $user->getValues("account_id")
+        ];
+    }
 }

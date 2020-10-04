@@ -439,4 +439,9 @@
             }
             return $r;
         }
+
+        public static function getAPIDefaultValues($user)
+        {
+            return [];
+        }
     }
