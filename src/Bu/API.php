@@ -4,6 +4,10 @@
 
     class API extends Bu
     {
+        use APIActions;
+        use APIConst;
+        use APIResponse;
+
         public static function call($method, $parameters = [], $sessionHash = null)
         {
             $APIClass = get_called_class();
@@ -14,101 +18,6 @@
                 $currentUser = $session->getUser();
             }
             return new $APIClass($method, $parameters, $currentUser);
-        }
-
-        public static function API_STATUS_ERROR()
-        {
-            return "error";
-        }
-
-        public static function API_STATUS_SUCCESS()
-        {
-            return "success";
-        }
-
-        public static function API_ERROR_INVALID_CLASSNAME()
-        {
-            return "API_ERROR_INVALID_CLASSNAME";
-        }
-
-        public static function API_ERROR_INVALID_ACTION()
-        {
-            return "API_ERROR_INVALID_ACTION";
-        }
-
-        public static function API_ERROR_INVALID_PARAMETERS()
-        {
-            return "API_ERROR_INVALID_PARAMETERS";
-        }
-
-        public static function API_ERROR_FORBIDDEN()
-        {
-            return "API_ERROR_FORBIDDEN";
-        }
-
-        public static function API_ERROR_INTERNAL_ERROR()
-        {
-            return "API_ERROR_INTERNAL_ERROR";
-        }
-
-        public static function API_ERROR_VALIDATION()
-        {
-            return "API_ERROR_VALIDATION";
-        }
-
-        public static function API_OUTPUT_JSON()
-        {
-            return "json";
-        }
-
-        public static function ACTION_ADD()
-        {
-            return "add";
-        }
-        public static function ACTION_DELETE()
-        {
-            return "delete";
-        }
-        public static function ACTION_VIEW()
-        {
-            return "view";
-        }
-        public static function ACTION_EDIT()
-        {
-            return "edit";
-        }
-        public static function ACTION_LIST()
-        {
-            return "list";
-        }
-
-        public static function VALID_ACTIONS()
-        {
-            return [
-            self::ACTION_ADD(),
-            self::ACTION_DELETE(),
-            self::ACTION_VIEW(),
-            self::ACTION_EDIT(),
-            self::ACTION_LIST()
-          ];
-        }
-
-        public static function API_MAP()
-        {
-            return [];
-        }
-
-        public static function SESSION_CLASS()
-        {
-            return "Bu\DefaultClass\Session";
-        }
-        public static function USER_CLASS()
-        {
-            return "Bu\DefaultClass\User";
-        }
-        public static function ACCOUNT_CLASS()
-        {
-            return "Bu\DefaultClass\Account";
         }
 
         public function __construct($method, $parameters, $currentUser = null)
@@ -150,16 +59,6 @@
         public function getClassKey()
         {
             return $this->getParsedMethod()[0];
-        }
-
-        public function getAction()
-        {
-            return $this->getParsedMethod()[1];
-        }
-
-        public static function isValidAction($action = "")
-        {
-            return in_array($action, self::VALID_ACTIONS());
         }
 
         public static function getAPIMap()
@@ -211,11 +110,6 @@
             } else {
                 return $this->getResponseError($this->getError());
             }
-        }
-
-        public function actionAffectsExistingObject($action)
-        {
-            return $action !== self::ACTION_ADD();
         }
 
         public function getObject($classname, $parameters)
@@ -304,70 +198,5 @@
             if (! $output) {
                 $output = self::API_OUTPUT_JSON();
             }
-        }
-
-        public function getActionFunction($action)
-        {
-            $ACTION_FUNCTION = [
-              self::ACTION_ADD() => function ($classname, $parameters) {
-                  $validationErrors = $classname::validate($parameters);
-                  if (count($validationErrors) !== 0) {
-                      return $this->getResponseError(self::API_ERROR_VALIDATION(), $validationErrors);
-                  } else {
-                      $object = $classname::add($parameters);
-                      if ($object) {
-                          return $this->getResponseSuccess($object->getValues());
-                      } else {
-                          return $this->getResponseError(self::API_ERROR_INTERNAL_ERROR());
-                      }
-                  }
-              },
-              self::ACTION_DELETE() => function ($classname, $parameters) {
-                  $object = $this->getObject($classname, $parameters);
-                  if ($object) {
-                      if ($object->delete()) {
-                          return $this->getResponseSuccess($object->getValues());
-                      } else {
-                          return $this->getResponseError(self::API_ERROR_INTERNAL_ERROR());
-                      }
-                  } else {
-                      return $this->getResponseError(self::API_ERROR_FORBIDDEN());
-                  }
-              },
-              self::ACTION_VIEW() => function ($classname, $parameters) {
-                  $object = $this->getObject($classname, $parameters);
-                  if ($object) {
-                      return $this->getResponseSuccess($object->getValues());
-                  } else {
-                      return $this->getResponseError(self::API_ERROR_FORBIDDEN());
-                  }
-              },
-              self::ACTION_EDIT() => function ($classname, $parameters) {
-                  $object = $this->getObject($classname, $parameters);
-                  if ($object) {
-                      $validationErrors = $classname::validateFields($parameters);
-                      if (count($validationErrors) !== 0) {
-                          return $this->getResponseError(self::API_ERROR_VALIDATION(), $validationErrors);
-                      } else {
-                          $editableFields = $classname::getEditableFields();
-                          foreach ($parameters as $field => $value) {
-                              if (in_array($field, $editableFields)) {
-                                  if (! $object->update($field, $value)) {
-                                      return $this->getResponseError(self::API_ERROR_INTERNAL_ERROR());
-                                  }
-                              }
-                          }
-                          $object = $this->getObject($classname, $parameters);
-                          return $this->getResponseSuccess($object->getValues());
-                      }
-                  } else {
-                      return $this->getResponseError(self::API_ERROR_FORBIDDEN());
-                  }
-              },
-              self::ACTION_LIST() => function ($classname, $parameters) {
-              }
-            ];
-
-            return $ACTION_FUNCTION[$action];
         }
     }
