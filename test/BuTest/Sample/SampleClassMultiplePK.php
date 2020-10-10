@@ -14,8 +14,7 @@
                     "id1" => [
                         "type" => self::TYPE_INT(),
                         "fk" => [
-                            "class" => "Bu\Test\Sample\SampleClass",
-                            "attr" => [ self::ATTR_FK_IS_OWNER() ]
+                            "class" => "Bu\Test\Sample\SampleClass"
                         ]
                     ],
                     "id2" => [

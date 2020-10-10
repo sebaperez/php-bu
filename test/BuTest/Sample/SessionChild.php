@@ -18,8 +18,7 @@ class SessionChild extends Base
                 "session_id" => [
                   "type" => self::TYPE_INT(),
                   "fk" => [
-                      "class" => "Bu\Test\Sample\Session",
-                      "attr" => [ self::ATTR_FK_IS_OWNER() ]
+                      "class" => "Bu\Test\Sample\Session"
                   ]
                 ]
             ],

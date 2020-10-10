@@ -18,8 +18,7 @@ class Session extends \Bu\Base
                 "user_id" => [
                     "type" => self::TYPE_INT(),
                     "fk" => [
-                        "class" => get_called_class()::GET_DEFAULT_FK_CLASS_USER_ID(),
-                        "attr" => [ self::ATTR_FK_IS_OWNER() ]
+                        "class" => get_called_class()::GET_DEFAULT_FK_CLASS_USER_ID()
                     ]
                 ],
                 "hash" => [
