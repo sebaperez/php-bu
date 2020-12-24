@@ -1,11 +1,11 @@
 <?php
 
+namespace Bu\BuUnit;
+
 use Bu\Test\Sample\SampleClass;
 use Bu\Test\Sample\SampleClassMultiplePK;
 use Bu\Test\BuTest;
 use Bu\Base;
-
-namespace Bu\BuUnit;
 
 class APITest extends \Bu\Test\BuTest
 {

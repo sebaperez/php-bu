@@ -1,11 +1,11 @@
 <?php
 
+namespace Bu\BuUnit;
+
 use Bu\Test\Sample\Account;
 use Bu\Test\Sample\User;
 use Bu\Test\Sample\Session;
 use Bu\Test\BuTest;
-
-namespace Bu\BuUnit;
 
 class DefaultTest extends \Bu\Test\BuTest
 {
