@@ -5,7 +5,7 @@
     "authors": [
         {
             "name": "sebaperez",
-            "email": "sperez@est.frba.utn.edu.ar"
+            "email": "sperez@frba.utn.edu.ar"
         }
     ],
     "require": {},
@@ -18,14 +18,10 @@
     },
     "autoload": {
         "psr-4": {
-            "Bu\\": "src/Bu/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Bu\\Test\\": "test/BuTest",
-            "Bu\\Test\\Sample\\": "test/BuTest/Sample",
-            "Bu\\BuUnit\\": "test/BuUnit"
+            "Bu\\": "src/Bu/",
+						"Bu\\Test\\": "test/BuTest",
+						"Bu\\Test\\Sample\\": "test/BuTest/Sample",
+						"Bu\\BuUnit\\": "test/BuUnit"
         }
     }
 }
