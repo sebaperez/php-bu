@@ -37,6 +37,7 @@ create table if not exists user (
 	name varchar(255),
 	lastname varchar(255),
 	password varchar(255),
+	permission int,
 	start_date datetime,
 	end_date datetime,
 	primary key(user_id)

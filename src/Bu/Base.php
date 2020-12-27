@@ -354,7 +354,7 @@
 
         public function update($field = null, $value = null)
         {
-            if (! $field || ! $value) {
+            if (! $field || ($value === false) || ($value === null)) {
                 throw new \Bu\Exception\InvalidArgument("values not defined for Bu::update");
             } elseif (! self::isField($field)) {
                 throw new \Bu\Exception\InvalidArgument("field $field does not exist for Bu::update");
@@ -391,7 +391,8 @@
 
         public function _setValue($field, $value)
         {
-            return (bool)($this->values[$field] = $value);
+					$this->values[$field] = $value;
+					return true;
         }
 
         public function getObject($field)
