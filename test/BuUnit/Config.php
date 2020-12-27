@@ -46,9 +46,13 @@
                         "password" => $this->getRandomString()
                     ],
                     "key" => [ "user_id" ],
-                    "function" => function () {
+                    "function" => function ($params) {
+											if (isset($params["account_id"])) {
+												return [ "account_id" => $params["account_id"] ];
+											} else {
                         $account = $this->getNew("Account");
                         return [ "account_id" => $account->getValue("account_id") ];
+											}
                     }
                 ],
                 "\Bu\Test\Sample\Session" => [

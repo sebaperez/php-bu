@@ -51,7 +51,7 @@ trait Factory
             $class = $this->getBaseClass() . "\\" . $class;
         }
         if ($this->hasPreObject($class) && ! $this->hasPreObjectPredefinedKey($class, $params)) {
-            $paramsPreObject = $this->getParamsPreObject($class);
+            $paramsPreObject = $this->getParamsPreObject($class, $params);
             $params = array_merge($params, $paramsPreObject);
         }
         $params = $this->fillDefaultValues($class, $params);
@@ -88,11 +88,11 @@ trait Factory
         }
     }
 
-    public function getParamsPreObject($class)
+    public function getParamsPreObject($class, $params)
     {
         $preObjects = $this->getPreObjectsDefinition();
         if (isset($preObjects[$class]["function"])) {
-            return $preObjects[$class]["function"]();
+            return $preObjects[$class]["function"]($params);
         }
         return [];
     }

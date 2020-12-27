@@ -149,4 +149,26 @@ class APITest extends \Bu\Test\BuTest
 			$this->assertArrayNotHasKey("password", $response);
 		}
 
+		public function test_list_users() {
+			$credentials = $this->getUserCredentials();
+			$user1 = $credentials["user"];
+			$user2 = $this->getNew("User", [ "account_id" => $user1->getValue("account_id") ]);
+			$this->assertEquals($user1->getValue("account_id"), $user2->getValue("account_id"));
+			$this->assertTrue($user1->grant("MANAGE_USERS"));
+			$response = $this->assertAPIOK("user/list", [], $credentials["sessionHash"]);
+			$this->assertCount(2, $response);
+			$this->assertEquals($user1->getValue("user_id"), $response[0]["user_id"]);
+			$this->assertEquals($user2->getValue("user_id"), $response[1]["user_id"]);
+			$this->assertArrayNotHasKey("password", $response[0]);
+			$this->assertArrayNotHasKey("password", $response[1]);
+		}
+
+		public function test_list_user_without_permission_fails() {
+			$credentials = $this->getUserCredentials();
+			$this->assertFalse($credentials["user"]->can("MANAGE_USERS"));
+			$response = $this->assertAPIError("user/list", [], $credentials["sessionHash"], [
+				"errorCode" => \Bu\API::API_ERROR_FORBIDDEN()
+			]);
+		}
+
 }

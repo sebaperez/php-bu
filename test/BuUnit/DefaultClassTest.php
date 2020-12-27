@@ -70,7 +70,7 @@ class DefaultTest extends \Bu\Test\BuTest
 
 		public function test_grant() {
 			$user = $this->getNew("User");
-			$permission = "USER_PERMISSION_MANAGE_USERS";
+			$permission = "MANAGE_USERS";
 			$this->assertFalse($user->can($permission));
 			$this->assertTrue($user->grant($permission));
 			$this->assertTrue($user->can($permission));
@@ -78,7 +78,7 @@ class DefaultTest extends \Bu\Test\BuTest
 
 		public function test_ungrant() {
 			$user = $this->getNew("User");
-			$permission = "USER_PERMISSION_MANAGE_USERS";
+			$permission = "MANAGE_USERS";
 			$this->assertFalse($user->can($permission));
 			$this->assertTrue($user->grant($permission));
 			$this->assertTrue($user->can($permission));
@@ -102,7 +102,7 @@ class DefaultTest extends \Bu\Test\BuTest
 
 		public function test_grant_fails_if_permission_was_already_granted() {
 			$user = $this->getNew("User");
-			$permission = "USER_PERMISSION_MANAGE_USERS";
+			$permission = "MANAGE_USERS";
 			$this->assertFalse($user->can($permission));
 			$this->assertTrue($user->grant($permission));
 			$this->assertFalse($user->grant($permission));
@@ -111,7 +111,7 @@ class DefaultTest extends \Bu\Test\BuTest
 
 		public function test_ungrant_fails_if_permission_was_already_ungranted() {
 			$user = $this->getNew("User");
-			$permission = "USER_PERMISSION_MANAGE_USERS";
+			$permission = "MANAGE_USERS";
 			$this->assertFalse($user->can($permission));
 			$this->assertTrue($user->grant($permission));
 			$this->assertTrue($user->can($permission));
@@ -122,7 +122,7 @@ class DefaultTest extends \Bu\Test\BuTest
 
 		public function test_ungrant_fails_if_permission_was_never_granted() {
 			$user = $this->getNew("User");
-			$permission = "USER_PERMISSION_MANAGE_USERS";
+			$permission = "MANAGE_USERS";
 			$this->assertFalse($user->can($permission));
 			$this->assertFalse($user->ungrant($permission));
 			$this->assertFalse($user->can($permission));

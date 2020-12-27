@@ -90,6 +90,22 @@
 								"function" => function() {
 									return $this->setOK($this->getUser()->getMetadata());
 								}
+							],
+							"user/list" => [
+								"function" => function() {
+									if ($this->getUser()->can("MANAGE_USERS")) {
+										$account = $this->getUser()->getObject("account_id");
+										$users = $account->findObjects(get_called_class()::USER_CLASS());
+										return $this->setOK(array_map(function($user) {
+											return $user->getMetadata();
+										}, $users));
+									} else {
+										return $this->setError(self::API_ERROR_FORBIDDEN());
+									}
+								}
+							],
+							"user/add" => [
+								
 							]
 						];
         }

@@ -47,7 +47,7 @@ class User extends \Bu\Base
 
 		public static function PERMISSION() {
 			return [
-				"USER_PERMISSION_MANAGE_USERS" => 1
+				"MANAGE_USERS" => 1
 			];
 		}
 
