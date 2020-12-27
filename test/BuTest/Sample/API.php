@@ -18,4 +18,14 @@ class API extends \Bu\API
     {
         return "Bu\Test\Sample\Account";
     }
+
+    public function getMethods() {
+      return array_merge(parent::getMethods(), [
+				"class/command" => [
+					"function" => function($params) {
+
+					}
+				]
+			]);
+    }
 }

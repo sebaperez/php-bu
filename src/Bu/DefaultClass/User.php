@@ -32,7 +32,8 @@ class User extends \Bu\Base
                     "attr" => [ self::ATTR_OPTIONAL() ]
                 ],
                 "password" => [
-                    "type" => self::TYPE_STRING()
+                    "type" => self::TYPE_STRING(),
+										"attr" => [ self::ATTR_NOT_VISIBLE() ]
                 ]
             ],
             "pk" => [ "user_id" ],

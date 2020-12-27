@@ -1,0 +1,7 @@
+[
+  {
+    "command": "composer test",
+    "files": "**/*.php",
+    "showOutput": true
+  }
+]

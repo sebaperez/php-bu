@@ -58,6 +58,9 @@
         {
             return 3;
         }
+				public static function ATTR_NOT_VISIBLE() {
+						return 4;
+				}
 
         // Class attributes
 
@@ -204,6 +207,11 @@
             return false;
         }
 
+				public static function isFieldNotVisible($field) {
+					$fieldDef = self::getField($field);
+					return isset($fieldDef["attr"]) && in_array(self::ATTR_NOT_VISIBLE(), $fieldDef["attr"]);
+				}
+
         public static function isEditableField($fieldName)
         {
             if (in_array($fieldName, self::getPK())) {
@@ -242,6 +250,16 @@
         {
             return $this->values;
         }
+
+				public function getMetadata() {
+					$values = $this->getValues();
+					foreach ($values as $field => $value) {
+						if (! self::isFieldNotVisible($field)) {
+							$return[$field] = $value;
+						}
+					}
+					return $return;
+				}
 
         public function getValue($field)
         {
