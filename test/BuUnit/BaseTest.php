@@ -227,8 +227,8 @@ class BaseTest extends \Bu\Test\BuTest
         $this->assertTrue($sampleobject->delete());
         $this->assertTrue($sampleobject->isDeleted());
 
-        $this->expectException(\Bu\Exception\InvalidObject::class);
         $_sampleobject = \Bu\Test\Sample\SampleClass::get($sampleobject->getValue("sampleclass_id"));
+				$this->assertNull($_sampleobject);
     }
 
     public function test_find()

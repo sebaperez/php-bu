@@ -214,4 +214,42 @@ class APITest extends \Bu\Test\BuTest
 			]);
 		}
 
+		public function test_delete_existing_user() {
+			$credentials = $this->getUserCredentials();
+			$user1 = $credentials["user"];
+			$this->assertTrue($user1->grant("MANAGE_USERS"));
+			$user2 = $this->getNew("User", [ "account_id" => $user1->getValue("account_id") ]);
+			$response = $this->assertAPIOK("user/delete", [ "user_id" => $user2->getValue("user_id") ], $credentials["sessionHash"]);
+			$this->assertNull(\Bu\Test\Sample\User::get($user2->getValue("user_id")));
+		}
+
+		public function test_delete_existing_user_fails_without_permission() {
+			$credentials = $this->getUserCredentials();
+			$user1 = $credentials["user"];
+			$user2 = $this->getNew("User", [ "account_id" => $user1->getValue("account_id") ]);
+			$response = $this->assertAPIError("user/delete", [ "user_id" => $user2->getValue("user_id") ], $credentials["sessionHash"], [
+				"errorCode" => \Bu\API::API_ERROR_FORBIDDEN()
+			]);
+		}
+
+		public function test_delete_existing_user_fails_if_account_differs() {
+			$credentials = $this->getUserCredentials();
+			$user1 = $credentials["user"];
+			$this->assertTrue($user1->grant("MANAGE_USERS"));
+			$user2 = $this->getNew("User");
+			$this->assertNotEquals($user1->getValue("account_id"), $user2->getValue("account_id"));
+			$response = $this->assertAPIError("user/delete", [ "user_id" => $user2->getValue("user_id") ], $credentials["sessionHash"], [
+				"errorCode" => \Bu\API::API_ERROR_FORBIDDEN()
+			]);
+		}
+
+		public function test_delete_existing_user_fails_if_user_does_not_exists() {
+			$credentials = $this->getUserCredentials();
+			$user1 = $credentials["user"];
+			$this->assertTrue($user1->grant("MANAGE_USERS"));
+			$response = $this->assertAPIError("user/delete", [ "user_id" => $this->getRandomInt() ], $credentials["sessionHash"], [
+				"errorCode" => \Bu\API::API_ERROR_FORBIDDEN()
+			]);
+		}
+
 }

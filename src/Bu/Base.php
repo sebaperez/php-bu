@@ -290,9 +290,9 @@
 
             if ($values) {
                 return new $class([ "values" => $values ]);
-            } else {
-                throw new \Bu\Exception\InvalidObject();
             }
+
+						return null;
         }
 
         public static function find($condition = null, $queryValues = null)

@@ -134,6 +134,25 @@
 										return $this->setError(self::API_ERROR_FORBIDDEN());
 									}
 								}
+							],
+							"user/delete" => [
+								"mandatoryParams" => [ "user_id" ],
+								"function" => function($params) {
+									$existingUser = get_called_class()::USER_CLASS()::get($params["user_id"]);
+									if ($existingUser &&
+											$this->getUser()->can("MANAGE_USERS") &&
+											$this->getUser()->getValue("account_id") == $existingUser->getValue("account_id") &&
+											$this->getUser()->getValue("user_id") != $params["user_id"]
+									) {
+										if ($existingUser->delete()) {
+											return $this->setOK();
+										} else {
+											return $this->setError(self::API_UNKNOWN_ERROR());
+										}
+									} else {
+										return $this->setError(self::API_ERROR_FORBIDDEN());
+									}
+								}
 							]
 						];
         }
