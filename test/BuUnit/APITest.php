@@ -41,7 +41,7 @@ class APITest extends \Bu\Test\BuTest
 							$this->assertEquals($expectedMessage["description"], $message["message"]["description"], json_encode($message));
 						}
         }
-        return $api;
+        return $message;
     }
 
 		public function assertAPIOK($method, $parameters, $session = null, $expectedMessage = null) {
@@ -168,6 +168,49 @@ class APITest extends \Bu\Test\BuTest
 			$this->assertFalse($credentials["user"]->can("MANAGE_USERS"));
 			$response = $this->assertAPIError("user/list", [], $credentials["sessionHash"], [
 				"errorCode" => \Bu\API::API_ERROR_FORBIDDEN()
+			]);
+		}
+
+		public function test_add_user() {
+			$credentials = $this->getUserCredentials();
+			$user1 = $credentials["user"];
+			$this->assertTrue($user1->grant("MANAGE_USERS"));
+			$NAME = $this->getRandomString();
+			$EMAIL = $this->getRandomEmail();
+			$response = $this->assertAPIOK("user/add", [
+				"name" => $NAME,
+				"email" => $EMAIL
+			], $credentials["sessionHash"]);
+			$this->assertEquals($user1->getValue("account_id"), $response["account_id"]);
+			$this->assertArrayNotHasKey("password", $response);
+			$this->assertEquals($NAME, $response["name"]);
+			$this->assertEquals($EMAIL, $response["email"]);
+		}
+
+		public function test_add_user_fails_without_permission() {
+			$credentials = $this->getUserCredentials();
+			$response = $this->assertAPIError("user/add", [
+				"name" => $this->getRandomString(),
+				"email" => $this->getRandomEmail()
+			], $credentials["sessionHash"], [
+				"errorCode" => \Bu\API::API_ERROR_FORBIDDEN()
+			]);
+		}
+
+		public function test_add_user_fails_with_validation() {
+			$credentials = $this->getUserCredentials();
+			$this->assertTrue($credentials["user"]->grant("MANAGE_USERS"));
+			$response = $this->assertAPIError("user/add", [
+				"name" => $this->getRandomString(),
+				"email" => $this->getRandomString()
+			], $credentials["sessionHash"], [
+				"errorCode" => \Bu\API::API_ERROR_VALIDATION(),
+				"message" => [
+					"email" => [
+						"error" => "ERROR_TYPE",
+						"details" => [ "type" => "email" ]
+					]
+				]
 			]);
 		}
 

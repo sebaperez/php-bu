@@ -18,6 +18,12 @@
 				public static function API_ERROR_LOGIN_WRONG_CREDENTIALS() {
 					return "API_ERROR_LOGIN_WRONG_CREDENTIALS";
 				}
+				public static function API_ERROR_VALIDATION() {
+					return "API_ERROR_VALIDATION";
+				}
+				public static function API_UNKNOWN_ERROR() {
+					return "API_UNKNOWN_ERROR";
+				}
 
 				public static function API_ATTRIBUTE_NO_REQUIRES_LOGIN() {
 					return "API_ATTRIBUTE_NO_REQUIRES_LOGIN";
@@ -105,7 +111,29 @@
 								}
 							],
 							"user/add" => [
-								
+								"preParameters" => function($params) {
+									$params["account_id"] = $this->getUser()->getValue("account_id");
+									$params["password"] = $this->getRandomString();
+									return $params;
+								},
+								"mandatoryParams" => get_called_class()::USER_CLASS()::getMandatoryFields(),
+								"function" => function($params) {
+									if ($this->getUser()->can("MANAGE_USERS")) {
+										$validation = get_called_class()::USER_CLASS()::validate($params);
+										if (! $validation) {
+											if ($user = get_called_class()::USER_CLASS()::add($params)) {
+												return $this->setOK($user->getMetadata());
+											} else {
+												return $this->setError(self::API_UNKNOWN_ERROR());
+											}
+											return $this->setOK();
+										} else {
+											return $this->setError(self::API_ERROR_VALIDATION(), $validation);
+										}
+									} else {
+										return $this->setError(self::API_ERROR_FORBIDDEN());
+									}
+								}
 							]
 						];
         }
@@ -130,6 +158,14 @@
 
 				public function getFunction() {
 					return $this->getMethodDefinition()["function"];
+				}
+
+				public function getPreParameters() {
+					return $this->getMethodDefinition()["preParameters"];
+				}
+
+				public function hasPreParameters() {
+					return isset($this->getMethodDefinition()["preParameters"]);
 				}
 
 				public function getMethodAttributes() {
@@ -214,7 +250,13 @@
             } else if ($this->isLoginRequired() && ! $this->hasUser()) {
 							$this->setError(self::API_ERROR_FORBIDDEN());
 							return false;
-            } else if ($this->hasMandatoryParams() && $this->isMandatoryParamsMissing()) {
+            }
+
+						if ($this->hasPreParameters()) {
+								$this->parameters = $this->getPreParameters()($this->getParameters());
+						}
+
+						if ($this->hasMandatoryParams() && $this->isMandatoryParamsMissing()) {
 							$this->setError(self::API_ERROR_MANDATORY_PARAMS_MISSING(), $this->getMandatoryParamsMissed());
 							return false;
 						} else {

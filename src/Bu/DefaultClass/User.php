@@ -22,7 +22,8 @@ class User extends \Bu\Base
                     ]
                 ],
                 "email" => [
-                    "type" => self::TYPE_STRING()
+                    "type" => self::TYPE_STRING(),
+										"validate" => [ "type" => "email" ]
                 ],
                 "name" => [
                     "type" => self::TYPE_STRING()
