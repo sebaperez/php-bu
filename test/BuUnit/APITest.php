@@ -12,8 +12,11 @@ class APITest extends \Bu\Test\BuTest
 {
     public static function CONFIG_CLASS()
     {
-        return "\Bu\BuUnit\Config";
+      return "\Bu\BuUnit\Config";
     }
+		public static function API_CLASS() {
+			return "\Bu\Test\Sample\API";
+		}
 
     public function test_initiate_api()
     {

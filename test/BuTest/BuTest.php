@@ -36,7 +36,7 @@
 
 				public function assertAPIError($method, $parameters, $session = null, $expectedMessage = null)
 				{
-						$api = \Bu\Test\Sample\API::get($method, $parameters, $session);
+						$api = get_called_class()::API_CLASS()::get($method, $parameters, $session);
 						$api->execute();
 						$message = $api->getMessage();
 						$this->assertEquals("error", $message["status"]);
@@ -52,7 +52,7 @@
 				}
 
 				public function assertAPIOK($method, $parameters, $session = null, $expectedMessage = null) {
-					$api = \Bu\Test\Sample\API::get($method, $parameters, $session);
+					$api = get_called_class()::API_CLASS()::get($method, $parameters, $session);
 					$api->execute();
 					$message = $api->getMessage();
 					$this->assertEquals("success", $message["status"], json_encode($message));
