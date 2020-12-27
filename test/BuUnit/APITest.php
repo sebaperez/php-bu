@@ -27,31 +27,6 @@ class APITest extends \Bu\Test\BuTest
         $this->assertEquals($parameters, $api->getParameters());
     }
 
-    public function assertAPIError($method, $parameters, $session = null, $expectedMessage = null)
-    {
-        $api = \Bu\Test\Sample\API::get($method, $parameters, $session);
-        $api->execute();
-        $message = $api->getMessage();
-        $this->assertEquals("error", $message["status"]);
-        if ($expectedMessage) {
-            if (isset($expectedMessage["errorCode"])) {
-                $this->assertEquals($expectedMessage["errorCode"], $message["message"]["errorCode"], json_encode($message));
-            }
-						if (isset($expectedMessage["description"])) {
-							$this->assertEquals($expectedMessage["description"], $message["message"]["description"], json_encode($message));
-						}
-        }
-        return $message;
-    }
-
-		public function assertAPIOK($method, $parameters, $session = null, $expectedMessage = null) {
-			$api = \Bu\Test\Sample\API::get($method, $parameters, $session);
-			$api->execute();
-			$message = $api->getMessage();
-			$this->assertEquals("success", $message["status"], json_encode($message));
-			return isset($message["message"]) ? $message["message"] : [];
-		}
-
     public function test_invalid_method_fails()
     {
         $this->assertAPIError($this->getRandomString(), [], null, [
