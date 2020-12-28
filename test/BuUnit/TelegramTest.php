@@ -14,11 +14,6 @@ class TelegramTest extends \Bu\Test\BuTest {
 			return "\Bu\BuUnit\Config";
 	}
 
-	public function getTelegramJSON($text = "", $user_id = 111) {
-		return '{"update_id":123,
-"message":{"message_id":1,"from":{"id":' . $user_id . ',"is_bot":false,"first_name":"Name","last_name":"Lastname","username":"username","language_code":"en"},"chat":{"id":222,"first_name":"Name","last_name":"Lastname","username":"username","type":"private"},"date":1609185559,"text":"' . $text . '"}}';
-	}
-
 	public function test_get_response_from_command() {
 		$COMMAND = "test_nologged";
 		$telegram = new \Bu\Test\Sample\Telegram($this->getTelegramJSON($COMMAND));

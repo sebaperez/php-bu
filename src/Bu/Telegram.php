@@ -19,6 +19,12 @@
 				return $this->getJson()["message"]["text"];
 			}
 
+			public function getParams() {
+				$params = explode(" ", $this->getText());
+				array_shift($params);
+				return $params;
+			}
+
 			public function getCommand() {
 				return explode(" ", $this->getText())[0];
 			}
