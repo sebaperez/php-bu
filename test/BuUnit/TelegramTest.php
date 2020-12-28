@@ -18,7 +18,7 @@ class TelegramTest extends \Bu\Test\BuTest {
 		$COMMAND = "test_nologged";
 		$telegram = new \Bu\Test\Sample\Telegram($this->getTelegramJSON($COMMAND));
 		$this->assertNotNull($telegram);
-		$this->assertTrue($telegram->run());
+		$this->assertTrue($telegram->run(true));
 		$this->assertEquals("response", $telegram->getResponse());
 
 		$this->assertEquals($COMMAND, $telegram->getText());
@@ -39,12 +39,12 @@ class TelegramTest extends \Bu\Test\BuTest {
 
 		$COMMAND = "test";
 		$telegram = new \Bu\Test\Sample\Telegram($this->getTelegramJSON($COMMAND, $USER_ID));
-		$this->assertTrue($telegram->run());
+		$this->assertTrue($telegram->run(true));
 		$this->assertNotNull($telegram->getResponse());
 
 		$USER_ID = 124;
 		$telegram = new \Bu\Test\Sample\Telegram($this->getTelegramJSON($COMMAND, $USER_ID));
-		$this->assertTrue($telegram->run());
+		$this->assertTrue($telegram->run(true));
 		$this->assertNull($telegram->getResponse());
 	}
 

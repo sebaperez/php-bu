@@ -71,12 +71,12 @@
 				}
 			}
 
-			public function run() {
+			public function run($test = false) {
 				$commands = $this->getCommands();
 				$command = $this->getCommand();
 				if (isset($commands[$command])) {
 					$this->response = $commands[$command]["function"]();
-					if ($this->response) {
+					if ($this->response && ! $test) {
 						$this->sendResponse();
 					}
 					return true;
