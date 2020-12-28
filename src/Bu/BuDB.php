@@ -11,26 +11,26 @@ class BuDB extends Bu
     private static $PASS = "";
     private static $DBNAME = "base";
 
-    private static function getHost()
+    public static function getDBHost()
     {
         return self::$HOST;
     }
-    private static function getUser()
+    public static function getDBUser()
     {
         return self::$USER;
     }
-    private static function getPass()
+    public static function getDBPass()
     {
         return self::$PASS;
     }
-    private static function getDbname()
+    public static function getDBname()
     {
         return self::$DBNAME;
     }
 
     private static function getConex()
     {
-        $conex = new \mysqli(self::getHost(), self::getUser(), self::getPass(), self::getDbname());
+        $conex = new \mysqli(parent::getDBHost(), parent::getDBUser(), parent::getDBPass(), parent::getDBname());
         if ($conex->connect_error) {
             throw new \Bu\Exception\DBConnectionError($conex->connect_error);
         }
