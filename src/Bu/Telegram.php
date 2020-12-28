@@ -39,6 +39,13 @@
 				return $this->getJson()["message"]["from"]["username"];
 			}
 
+			public function getSession() {
+				$telegramSession = get_called_class()::GET_DEFAULT_FK_CLASS_TELEGRAM_SESSION()::findByUserId($this->getUserId());
+				if ($telegramSession) {
+					return $telegramSession->getSession();
+				}
+			}
+
 			public function sendResponse() {
 				$token = $this->getToken();
 

@@ -58,4 +58,12 @@ create table if not exists sessionchild (
   start_date datetime,
   end_date datetime,
   primary key (sessionchild_id)
-)
+);
+
+create table if not exists telegram_session (
+	session_id int,
+	telegram_user_id int,
+	start_date datetime,
+	end_date datetime,
+	primary key (session_id, telegram_user_id)
+);

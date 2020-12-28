@@ -59,10 +59,14 @@ trait Factory
         $this->assertEmpty($validation, "Error on validation: " . json_encode($validation));
         $object = $class::add($params);
         if ($object) {
-            array_push($this->_factoryObjects, $object);
+            $this->setToDelete($object);
             return $object;
         }
     }
+
+		public function setToDelete($object) {
+			array_push($this->_factoryObjects, $object);
+		}
 
     public function getBaseClass()
     {
