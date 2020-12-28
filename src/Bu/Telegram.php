@@ -39,11 +39,33 @@
 				return $this->getJson()["message"]["from"]["username"];
 			}
 
+			public function sendResponse() {
+				$token = $this->getToken();
+
+				$params = http_build_query([
+					"chat_id" => $this->getChatId(),
+					"text" => $this->getResponse()
+				]);
+
+				$ch = curl_init("https://api.telegram.org/bot$token/sendMessage");
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch, CURLOPT_POST, true);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+				$return = curl_exec($ch);
+				$json = json_decode($return, true);
+				if (isset($json["ok"]) && $json["ok"] === true) {
+					return true;
+				}
+			}
+
 			public function run() {
 				$commands = $this->getCommands();
 				$command = $this->getCommand();
 				if (isset($commands[$command])) {
 					$this->response = $commands[$command]["function"]();
+					if ($this->response) {
+						$this->sendResponse();
+					}
 					return true;
 				}
 			}

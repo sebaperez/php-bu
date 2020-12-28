@@ -8,7 +8,7 @@ class Telegram extends \Bu\Telegram
 {
 
 		public function getToken() {
-			return "1408890635:AAGnl6rydxoigoEA5K9QrKiUxZMDXrMWeLM";
+			return "";
 		}
 
     public function getCommands() {
