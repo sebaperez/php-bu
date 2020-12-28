@@ -1,27 +1,28 @@
 {
-    "name": "sebaperez/php-bu",
-    "description": "Free PHP framework",
-    "type": "library",
-    "authors": [
-        {
-            "name": "sebaperez",
-            "email": "sperez@frba.utn.edu.ar"
-        }
-    ],
-    "require": {},
-    "require-dev": {
-        "phpunit/phpunit": "^8"
-    },
-    "scripts": {
-	"make-db-test": "mysql -uroot < test/BuTest/Sample/extra/SampleClassDB.sql",
-        "test": "phpunit --configuration test/phpunit.xml"
-    },
-    "autoload": {
-        "psr-4": {
-            "Bu\\": "src/Bu/",
-						"Bu\\Test\\": "test/BuTest",
-						"Bu\\Test\\Sample\\": "test/BuTest/Sample",
-						"Bu\\BuUnit\\": "test/BuUnit"
-        }
-    }
+	"name": "sebaperez/php-bu",
+	"description": "Free PHP framework",
+	"type": "library",
+	"authors": [
+		{
+			"name": "sebaperez",
+			"email": "sperez@frba.utn.edu.ar"
+		}
+	],
+	"require": {
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^8"
+	},
+	"scripts": {
+		"make-db-test": "mysql -uroot < test/BuTest/Sample/extra/SampleClassDB.sql",
+		"test": "phpunit --configuration test/phpunit.xml"
+	},
+	"autoload": {
+		"psr-4": {
+			"Bu\\": "src/Bu/",
+			"Bu\\Test\\": "test/BuTest",
+			"Bu\\Test\\Sample\\": "test/BuTest/Sample",
+			"Bu\\BuUnit\\": "test/BuUnit"
+		}
+	}
 }
