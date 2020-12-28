@@ -30,7 +30,12 @@ class BuDB extends Bu
 
     private static function getConex()
     {
-        $conex = new \mysqli(parent::getDBHost(), parent::getDBUser(), parent::getDBPass(), parent::getDBname());
+				$host = isset($GLOBALS["DBHOST"]) ? $GLOBALS["DBHOST"] : self::getDBHost();
+				$user = isset($GLOBALS["DBUSER"]) ? $GLOBALS["DBUSER"] : self::getDBUser();
+				$pass = isset($GLOBALS["DBPASS"]) ? $GLOBALS["DBPASS"] : self::getDBPass();
+				$dbname = isset($GLOBALS["DBNAME"]) ? $GLOBALS["DBNAME"] : self::getDBname();
+
+        $conex = new \mysqli($host, $user, $pass, $dbname);
         if ($conex->connect_error) {
             throw new \Bu\Exception\DBConnectionError($conex->connect_error);
         }

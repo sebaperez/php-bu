@@ -30,21 +30,4 @@
             return $randomString;
         }
 
-				public static function getDBHost()
-		    {
-		        return "localhost";
-		    }
-		    public static function getDBUser()
-		    {
-		        return "root";
-		    }
-		    public static function getDBPass()
-		    {
-		        return "";
-		    }
-		    public static function getDBname()
-		    {
-		        return "base";
-		    }
-
     }
