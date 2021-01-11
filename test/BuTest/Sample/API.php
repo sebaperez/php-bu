@@ -25,6 +25,12 @@ class API extends \Bu\API
 					"function" => function($params) {
 
 					}
+				],
+				"telegram/test" => [
+					"attr" => [ self::API_ATTRIBUTE_NO_REQUIRES_LOGIN() ],
+					"function" => function($params) {
+						return $this->setOK("ok");
+					}
 				]
 			]);
     }

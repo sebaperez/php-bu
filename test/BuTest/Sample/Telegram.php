@@ -11,6 +11,10 @@ class Telegram extends \Bu\Telegram
 			return "Bu\Test\Sample\TelegramSession";
 		}
 
+		public static function GET_DEFAULT_API_CLASS() {
+			return "Bu\Test\Sample\API";
+		}
+
 		public function getToken() {
 			return "";
 		}
@@ -18,16 +22,28 @@ class Telegram extends \Bu\Telegram
     public function getCommands() {
 			return [
 				"test" => [
-					"function" => function() {
-						$session = $this->getSession();
-						if ($session) {
-							return "response";
-						}
+					"apiMethod" => "test",
+					"paramsFunction" => function() {
+						return [];
+					},
+					"success" => function() {
+						return "response";
 					}
 				],
 				"test_nologged" => [
-					"function" => function() {
+					"attrs" => [ self::TELEGRAM_ATTR_NO_LOGIN_REQUIRED() ],
+					"apiMethod" => "telegram/test",
+					"paramsFunction" => function() {
+						return [];
+					},
+					"success" => function() {
 						return "response";
+					}
+				],
+				"fallback" => [
+					"attrs" => [],
+					"error" => function() {
+						return "error";
 					}
 				]
 			];

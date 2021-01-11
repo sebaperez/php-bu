@@ -18,6 +18,7 @@ class TelegramTest extends \Bu\Test\BuTest {
 		$COMMAND = "test_nologged";
 		$telegram = new \Bu\Test\Sample\Telegram($this->getTelegramJSON($COMMAND));
 		$this->assertNotNull($telegram);
+		$this->assertFalse($telegram->isLoginRequired());
 		$this->assertTrue($telegram->run(true));
 		$this->assertEquals("response", $telegram->getResponse());
 

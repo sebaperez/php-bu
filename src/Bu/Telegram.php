@@ -5,6 +5,8 @@
     class Telegram extends Bu
     {
 
+			public static function TELEGRAM_ATTR_NO_LOGIN_REQUIRED() { return "TELEGRAM_ATTR_NO_LOGIN_REQUIRED"; }
+
 			public function __construct($rawJson) {
 				$this->rawJson = $rawJson;
 				$this->json = json_decode($rawJson, true);
@@ -71,13 +73,74 @@
 				}
 			}
 
-			public function run($test = false) {
+			public function getCommandDefinition() {
 				$commands = $this->getCommands();
 				$command = $this->getCommand();
-				if (isset($commands[$command])) {
-					$this->response = $commands[$command]["function"]();
-					if ($this->response && ! $test) {
-						$this->sendResponse();
+				return isset($commands[$command]) ? $commands[$command] : false;
+			}
+
+			public function getFallbackDefinition() {
+				$commands = $this->getCommands();
+				return $commands["fallback"];
+			}
+
+			public function isCommandDefined() {
+				return (bool)$this->getCommandDefinition();
+			}
+
+			public function getCommandMethod($method) {
+				if (isset($this->getCommandDefinition()[$method])) {
+					return $this->getCommandDefinition()[$method];
+				} else {
+					return $this->getFallbackDefinition()[$method];
+				}
+			}
+
+			public function getCommandAPIMethod() {
+				return $this->getCommandMethod("apiMethod");
+			}
+
+			public function getCommandParamFunction() {
+				return $this->getCommandMethod("paramsFunction");
+			}
+
+			public function getCommandSuccessFunction() {
+				return $this->getCommandMethod("success");
+			}
+
+			public function getCommandErrorFunction() {
+				return $this->getCommandMethod("error");
+			}
+
+			public function getCommandAttrs() {
+				return $this->getCommandMethod("attrs");
+			}
+
+			public function hasAttr($attr) {
+				return in_array($attr, $this->getCommandAttrs());
+			}
+
+			public function isLoginRequired() {
+				return ! $this->hasAttr(self::TELEGRAM_ATTR_NO_LOGIN_REQUIRED());
+			}
+
+			public function run($test = false) {
+				if ($this->isCommandDefined()) {
+					$params = $this->getCommandParamFunction()($this->getParams());
+					$session = $this->getSession();
+					$sessionHash = isset($session) ? $session->getValue("hash") : null;
+					if ($sessionHash || (! $sessionHash && ! $this->isLoginRequired())) {
+						$api = get_called_class()::GET_DEFAULT_API_CLASS()::get($this->getCommandAPIMethod(), $params, $sessionHash);
+						$api->execute();
+						$message = $api->getMessage();
+						if ("success" == $message["status"]) {
+							$this->response = $this->getCommandSuccessFunction()($message["message"]);
+						} else {
+							$this->response = $this->getCommandErrorFunction()($message["message"]);
+						}
+						if ($this->response && ! $test) {
+							$this->sendResponse();
+						}
 					}
 					return true;
 				}
