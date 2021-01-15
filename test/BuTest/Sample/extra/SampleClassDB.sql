@@ -5,6 +5,7 @@ create table if not exists sampleclass (
         sampleclass_id int auto_increment,
         name varchar(255),
 	optional varchar(255),
+	value_validation int,
 	date datetime,
 	time datetime,
 	max_time datetime,

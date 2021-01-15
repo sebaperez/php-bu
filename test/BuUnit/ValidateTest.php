@@ -57,6 +57,30 @@ class ValidateTest extends \Bu\Test\BuTest
         $this->assertEquals(20, $validation["optional"]["details"]["max_length"]);
     }
 
+		public function test_validate_min_value()
+		{
+				$validation = \Bu\Test\Sample\SampleClass::validate([
+						"name" => $this->getRandomString(),
+						"value_validation" => 1
+				]);
+				$this->assertArrayHasKey("value_validation", $validation);
+				$this->assertArrayHasKey("error", $validation["value_validation"]);
+				$this->assertEquals(\Bu\Test\Sample\SampleClass::VALIDATE_ERROR_VALUE(), $validation["value_validation"]["error"]);
+				$this->assertEquals(10, $validation["value_validation"]["details"]["min_value"]);
+		}
+
+		public function test_validate_max_value()
+		{
+				$validation = \Bu\Test\Sample\SampleClass::validate([
+						"name" => $this->getRandomString(),
+						"value_validation" => 100
+				]);
+				$this->assertArrayHasKey("value_validation", $validation);
+				$this->assertArrayHasKey("error", $validation["value_validation"]);
+				$this->assertEquals(\Bu\Test\Sample\SampleClass::VALIDATE_ERROR_VALUE(), $validation["value_validation"]["error"]);
+				$this->assertEquals(99, $validation["value_validation"]["details"]["max_value"]);
+		}
+
     public function test_validate_min_date()
     {
         $validation = \Bu\Test\Sample\SampleClass::validate([

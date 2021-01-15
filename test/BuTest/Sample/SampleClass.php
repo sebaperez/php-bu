@@ -27,6 +27,15 @@ class SampleClass extends Base
                         "max_length" => 20
                     ]
                 ],
+								"value_validation" => [
+										"type" => self::TYPE_INT(),
+										"attr" => [ self::ATTR_OPTIONAL() ],
+										"validate" => [
+												"type" => self::VALIDATE_TYPE_NUMBER(),
+												"min_value" => 10,
+												"max_value" => 99
+										]
+								],
                 "date" => [
                     "type" => self::TYPE_STRING(),
                     "attr" => [ self::ATTR_OPTIONAL() ],

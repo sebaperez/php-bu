@@ -54,6 +54,22 @@
         {
             return "max_length";
         }
+				public static function VALIDATE_MIN_VALUE()
+				{
+						return "min_value";
+				}
+				public static function VALIDATE_MAX_VALUE()
+				{
+						return "max_value";
+				}
+				public static function VALIDATE_MIN_DATE()
+				{
+						return "min_date";
+				}
+				public static function VALIDATE_MAX_DATE()
+				{
+						return "max_date";
+				}
         public static function VALIDATE_TYPE_JSON()
         {
             return "json";
@@ -80,6 +96,9 @@
         {
             return "FORBIDDEN";
         }
+				public static function VALIDATE_ERROR_VALUE() {
+						return "ERROR_VALUE";
+				}
 
         public static function setError($response, $field, $error, $details = null)
         {
@@ -116,20 +135,51 @@
             return (self::hasValidateMinLength($field) || self::hasValidateMaxLength($field));
         }
 
+				public static function hasValidateValue($field)
+				{
+						return (self::hasValidateMinValue($field) || self::hasValidateMaxValue($field));
+				}
+
+				public static function hasValidateMinValue($field)
+        {
+            return isset(self::getField($field)["validate"][self::VALIDATE_MIN_VALUE()]);
+        }
+
+        public static function hasValidateMaxValue($field)
+        {
+            return isset(self::getField($field)["validate"][self::VALIDATE_MAX_VALUE()]);
+        }
+
         public static function hasValidateMinLength($field)
         {
-            return isset(self::getField($field)["validate"]["min_length"]);
+            return isset(self::getField($field)["validate"][self::VALIDATE_MIN_LENGTH()]);
         }
 
         public static function hasValidateMaxLength($field)
         {
-            return isset(self::getField($field)["validate"]["max_length"]);
+            return isset(self::getField($field)["validate"][self::VALIDATE_MAX_LENGTH()]);
         }
+
+				public static function getValidateMinValue($field)
+				{
+						if (self::hasValidateMinValue($field)) {
+								return self::getField($field)["validate"][self::VALIDATE_MIN_VALUE()];
+						}
+						return false;
+				}
+
+				public static function getValidateMaxValue($field)
+				{
+						if (self::hasValidateMaxValue($field)) {
+								return self::getField($field)["validate"][self::VALIDATE_MAX_VALUE()];
+						}
+						return false;
+				}
 
         public static function getValidateMinLength($field)
         {
             if (self::hasValidateMinLength($field)) {
-                return self::getField($field)["validate"]["min_length"];
+                return self::getField($field)["validate"][self::VALIDATE_MIN_LENGTH()];
             }
             return false;
         }
@@ -137,25 +187,25 @@
         public static function getValidateMaxLength($field)
         {
             if (self::hasValidateMaxLength($field)) {
-                return self::getField($field)["validate"]["max_length"];
+                return self::getField($field)["validate"][self::VALIDATE_MAX_LENGTH()];
             }
             return false;
         }
 
         public static function hasValidateDateMin($field)
         {
-            return isset(self::getField($field)["validate"]["min_date"]);
+            return isset(self::getField($field)["validate"][self::VALIDATE_MIN_DATE()]);
         }
 
         public static function hasValidateDateMax($field)
         {
-            return isset(self::getField($field)["validate"]["max_date"]);
+            return isset(self::getField($field)["validate"][self::VALIDATE_MAX_DATE()]);
         }
 
         public static function getValidateDateMin($field)
         {
             if (self::hasValidateDateMin($field)) {
-                return self::getField($field)["validate"]["min_date"];
+                return self::getField($field)["validate"][self::VALIDATE_MIN_DATE()];
             }
             return false;
         }
@@ -163,7 +213,7 @@
         public static function getValidateDateMax($field)
         {
             if (self::hasValidateDateMax($field)) {
-                return self::getField($field)["validate"]["max_date"];
+                return self::getField($field)["validate"][self::VALIDATE_MAX_DATE()];
             }
             return false;
         }
@@ -246,19 +296,38 @@
                 if (self::hasValidateMinLength($field)) {
                     $minLength = self::getValidateMinLength($field);
                     if ($minLength !== false && strlen($value) < $minLength) {
-                        $lengthError["min_length"] = $minLength;
+                        $lengthError[self::VALIDATE_MIN_LENGTH()] = $minLength;
                     }
                 }
                 if (self::hasValidateMaxLength($field)) {
                     $maxLength = self::getValidateMaxLength($field);
                     if ($maxLength !== false && strlen($value) > $maxLength) {
-                        $lengthError["max_length"] = $maxLength;
+                        $lengthError[self::VALIDATE_MAX_LENGTH()] = $maxLength;
                     }
                 }
                 if (! empty($lengthError)) {
                     $response = self::setError($response, $field, self::VALIDATE_ERROR_LENGTH(), $lengthError);
                 }
             }
+
+						if (self::hasValidateValue($field)) {
+								$valueError = [];
+								if (self::hasValidateMinValue($field)) {
+										$minValue = self::getValidateMinValue($field);
+										if ($minValue !== false && $value < $minValue) {
+												$valueError[self::VALIDATE_MIN_VALUE()] = $minValue;
+										}
+								}
+								if (self::hasValidateMaxValue($field)) {
+										$maxValue = self::getValidateMaxValue($field);
+										if ($maxValue !== false && $value > $maxValue) {
+												$valueError[self::VALIDATE_MAX_VALUE()] = $maxValue;
+										}
+								}
+								if (! empty($valueError)) {
+										$response = self::setError($response, $field, self::VALIDATE_ERROR_VALUE(), $valueError);
+								}
+						}
 
             $dateError = [];
             if (self::hasDateOrDatetimeValidate($field)) {
@@ -271,13 +340,13 @@
                 if (self::hasValidateDateMin($field)) {
                     $min_date = self::getValidateDateMin($field);
                     if (new \DateTime($min_date) > new \DateTime($value)) {
-                        $dateError["min_date"] = $min_date;
+                        $dateError[self::VALIDATE_MIN_DATE()] = $min_date;
                     }
                 }
                 if (self::hasValidateDateMax($field)) {
                     $max_date = self::getValidateDateMax($field);
                     if (new \DateTime($max_date) < new \DateTime($value)) {
-                        $dateError["max_date"] = $max_date;
+                        $dateError[self::VALIDATE_MAX_DATE()] = $max_date;
                     }
                 }
 

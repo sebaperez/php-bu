@@ -45,7 +45,7 @@ class BaseTest extends \Bu\Test\BuTest
     {
         $fieldsName = \Bu\Test\Sample\SampleClass::getFieldNames();
         $this->assertIsArray($fieldsName);
-        $this->assertEquals($fieldsName, ["sampleclass_id", "name", "optional", "date", "time", "max_time", "start_date", "end_date"]);
+        $this->assertEquals($fieldsName, ["sampleclass_id", "name", "optional", "value_validation", "date", "time", "max_time", "start_date", "end_date"]);
     }
 
     public function test_is_valid_field()
