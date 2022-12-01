@@ -96,9 +96,12 @@
         {
             return "FORBIDDEN";
         }
-				public static function VALIDATE_ERROR_VALUE() {
-						return "ERROR_VALUE";
-				}
+	public static function VALIDATE_ERROR_VALUE() {
+		return "ERROR_VALUE";
+	}
+	public static function VALIDATE_ERROR_DUPLICATED() {
+		return "ERROR_DUPLICATED";
+	}
 
         public static function setError($response, $field, $error, $details = null)
         {
