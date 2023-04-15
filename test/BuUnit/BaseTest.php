@@ -135,6 +135,12 @@ class BaseTest extends \Bu\Test\BuTest
         $this->assertEquals($NAME, $sampleobject->getValue("name"));
     }
 
+    public function test_add_double_value() {
+	$VALUE = 123.45;
+	$double = \Bu\Test\Sample\SampleClassDouble::add([ "value" => $VALUE ]);
+	$this->assertEquals($double->getValue("value"), $VALUE);
+    }
+
     public function test_add_composed_pk()
     {
         $NAME = $this->getRandomString();
