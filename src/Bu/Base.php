@@ -299,6 +299,10 @@
 						return null;
         }
 
+	public static function executeQuery($query, $querySymbols, $queryValues) {
+		return BuDB::executeQuery($query, $querySymbols, $queryValues);
+	}
+
         public static function find($condition = null, $queryValues = null)
         {
             if (! $condition) {

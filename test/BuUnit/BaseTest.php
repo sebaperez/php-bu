@@ -270,6 +270,11 @@ class BaseTest extends \Bu\Test\BuTest
         $objects = \Bu\Test\Sample\SampleClass::find("sampleclass_id >= ? order by name desc limit 1", ["sampleclass_id" => $sampleobject1->getValue("sampleclass_id")]);
         $this->assertCount(1, $objects);
         $this->assertEquals($NAME2, $objects[0]->getValue("name"));
+
+	$values = \Bu\Test\Sample\SampleClass::executeQuery("select * from sampleclass where sampleclass_id >= ?", "i", [ $sampleobject1->getValue("sampleclass_id") ]);
+	$this->assertCount(2, $values);
+	$this->assertEquals($NAME1, $values[0]["name"]);
+	$this->assertEquals($NAME2, $values[1]["name"]);
     }
 
     public function test_find_exclude_end_date()
