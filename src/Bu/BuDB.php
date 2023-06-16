@@ -128,7 +128,11 @@ class BuDB extends Bu
         $parsedFields = implode(",", $fieldNames);
         $table = $class::getTable();
 
-        $query = "select $parsedFields from $table where $condition";
+        $query = "select $parsedFields from $table where";
+	if ($class::hasEndDate()) {
+		$query .= " end_date is null and";
+	}
+	$query .= " $condition";
         $querySymbols = [];
         $parsedValues = [];
 
@@ -138,9 +142,6 @@ class BuDB extends Bu
                 array_push($querySymbols, $symbol);
                 array_push($parsedValues, $value);
             }
-        }
-        if ($class::hasEndDate()) {
-            $query .= " and end_date is null";
         }
 
         $conex = self::getConex();

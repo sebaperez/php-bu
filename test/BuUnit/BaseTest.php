@@ -253,6 +253,25 @@ class BaseTest extends \Bu\Test\BuTest
         $this->assertTrue($flag);
     }
 
+    public function test_find_with_order_and_limit() {
+        $NAME1 = "1test";
+        $sampleobject1 = $this->getNew("SampleClass", [ "name" => $NAME1 ]);
+        $NAME2 = "2test";
+        $sampleobject2 = $this->getNew("SampleClass", [ "name" => $NAME2 ]);
+        $objects = \Bu\Test\Sample\SampleClass::find("sampleclass_id >= ?", ["sampleclass_id" => $sampleobject1->getValue("sampleclass_id")]);
+        $this->assertCount(2, $objects);
+	$objects = \Bu\Test\Sample\SampleClass::find("sampleclass_id >= ? order by name desc", ["sampleclass_id" => $sampleobject1->getValue("sampleclass_id")]);
+        $this->assertCount(2, $objects);
+	$this->assertEquals($NAME2, $objects[0]->getValue("name"));
+	$this->assertEquals($NAME1, $objects[1]->getValue("name"));
+        $objects = \Bu\Test\Sample\SampleClass::find("sampleclass_id >= ? order by name asc limit 1", ["sampleclass_id" => $sampleobject1->getValue("sampleclass_id")]);
+        $this->assertCount(1, $objects);
+        $this->assertEquals($NAME1, $objects[0]->getValue("name"));
+        $objects = \Bu\Test\Sample\SampleClass::find("sampleclass_id >= ? order by name desc limit 1", ["sampleclass_id" => $sampleobject1->getValue("sampleclass_id")]);
+        $this->assertCount(1, $objects);
+        $this->assertEquals($NAME2, $objects[0]->getValue("name"));
+    }
+
     public function test_find_exclude_end_date()
     {
         $NAME = "test";
