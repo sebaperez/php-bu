@@ -149,7 +149,7 @@ class BuDB extends Bu
         $table = $class::getTable();
 
         $query = "select $parsedFields from $table where";
-	if ($class::hasEndDate()) {
+	if ($class::hasEndDate() && ! $class::isLoadableIfDeleted()) {
 		$query .= " end_date is null and";
 	}
 	$query .= " $condition";
@@ -162,9 +162,6 @@ class BuDB extends Bu
                 array_push($querySymbols, $symbol);
                 array_push($parsedValues, $value);
             }
-        }
-        if ($class::hasEndDate() && ! $class::isLoadableIfDeleted()) {
-            $query .= " and end_date is null";
         }
 
         $conex = self::getConex();
