@@ -72,6 +72,9 @@
         {
             return 2;
         }
+	public static function ATTR_LOADABLE_IF_DELETED() {
+	    return 3;
+	}
 
         public static function getDef()
         {
@@ -193,6 +196,10 @@
         {
             return in_array(self::ATTR_WITH_END_DATE(), self::getAttr());
         }
+
+	public static function isLoadableIfDeleted() {
+	    return in_array(self::ATTR_LOADABLE_IF_DELETED(), self::getAttr());
+	}
 
         public static function isFieldMandatory($fieldName)
         {

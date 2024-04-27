@@ -102,7 +102,7 @@ class BuDB extends Bu
             array_push($querySymbols, $symbol);
             array_push($parsedValues, $pkValue);
         }
-        if ($class::hasEndDate()) {
+        if ($class::hasEndDate() && ! $class::isLoadableIfDeleted()) {
             array_push($conditions, "end_date is null");
         }
         $query .= implode(" and ", $conditions);
@@ -139,7 +139,7 @@ class BuDB extends Bu
                 array_push($parsedValues, $value);
             }
         }
-        if ($class::hasEndDate()) {
+        if ($class::hasEndDate() && ! $class::isLoadableIfDeleted()) {
             $query .= " and end_date is null";
         }
 
@@ -189,7 +189,7 @@ class BuDB extends Bu
             array_push($querySymbols, $symbol);
             array_push($parsedValues, $value);
         }
-        if ($class::hasEndDate()) {
+        if ($class::hasEndDate() && ! $class::isLoadableIfDeleted()) {
             array_push($conditions, "end_date is null");
         }
         $query .= implode(" and ", $conditions);

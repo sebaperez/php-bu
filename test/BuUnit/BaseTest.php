@@ -325,4 +325,24 @@ class BaseTest extends \Bu\Test\BuTest
         $this->assertEquals($objects[1]->getValue("id1"), $sampleobject1->getValue("sampleclass_id"));
         $this->assertEquals($objects[1]->getValue("id2"), $sampleobject3->getValue("sampleclass_id"));
     }
+
+    public function test_find_objects_on_loadable_if_deleted() {
+	$string = $this->getRandomString() . "@test.com";
+        $sampleobject1 = $this->getNew("SampleClassDeleted", [ "optional" => $string ]);
+        $sampleobject2 = $this->getNew("SampleClassDeleted", [ "optional" => $string ]);
+	$objects = \Bu\Test\Sample\SampleClassDeleted::find("optional = ?", [ "optional" => $string ]);
+	$this->assertNotEmpty($objects);
+	$this->assertCount(2, $objects);
+
+	$this->assertFalse($objects[0]->isDeleted());
+	$this->assertFalse($objects[1]->isDeleted());
+	$this->assertNotNull($sampleobject1->delete());
+
+	$objects = \Bu\Test\Sample\SampleClassDeleted::find("optional = ?", [ "optional" => $string ]);
+	$this->assertNotEmpty($objects);
+	$this->assertCount(2, $objects);
+	$this->assertTrue($objects[0]->isDeleted());
+	$this->assertFalse($objects[1]->isDeleted());
+    }
+
 }
