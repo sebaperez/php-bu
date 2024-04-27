@@ -142,9 +142,17 @@ class BuDB extends Bu
 	}
     }
 
+    public static function hasSimpleLoad() {
+	return \Bu\Base::hasSimpleLoad();
+    }
+
     public static function find($class, $condition, $queryValues)
     {
-        $fieldNames = $class::getPK();
+	if (self::hasSimpleLoad()) {
+		$fieldNames = $class::getFieldNames();
+	} else {
+		$fieldNames = $class::getPK();
+	}
         $parsedFields = implode(",", $fieldNames);
         $table = $class::getTable();
 
@@ -175,7 +183,9 @@ class BuDB extends Bu
                     $result = $st->get_result();
                     $r = [];
                     while ($data = $result->fetch_assoc()) {
-                        if ($class::hasSinglePK()) {
+			if (self::hasSimpleLoad()) {
+			    $id = $data;
+			} else if ($class::hasSinglePK()) {
                             $id = $data[$class::getPK()[0]];
                         } else {
                             $id = $data;
