@@ -25,6 +25,9 @@
         {
             return 3;
         }
+	public static function TYPE_DOUBLE() {
+	    return 4;
+	}
 
         public static function STRING_FIELD_START_DATE()
         {
@@ -40,7 +43,8 @@
             return [
                 self::TYPE_INT() => "i",
                 self::TYPE_STRING() => "s",
-                self::TYPE_DATE() => "s"
+                self::TYPE_DATE() => "s",
+		self::TYPE_DOUBLE() => "d"
             ];
         }
 
@@ -301,6 +305,10 @@
 
 						return null;
         }
+
+	public static function executeQuery($query, $querySymbols, $queryValues) {
+		return BuDB::executeQuery($query, $querySymbols, $queryValues);
+	}
 
         public static function find($condition = null, $queryValues = null)
         {

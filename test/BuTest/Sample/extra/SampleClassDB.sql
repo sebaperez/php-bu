@@ -68,3 +68,11 @@ create table if not exists telegram_session (
 	end_date datetime,
 	primary key (session_id, telegram_user_id)
 );
+
+create table if not exists sampleclassdouble (
+	sampleclassdouble_id int auto_increment,
+	value decimal(15, 2),
+	start_date datetime,
+	end_date datetime,
+	primary key(sampleclassdouble_id)
+);

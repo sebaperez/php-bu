@@ -91,11 +91,11 @@ class User extends \Bu\Base
     }
 
 		public static function permissionExists($permission) {
-			return isset(self::PERMISSION()[$permission]);
+			return isset(get_called_class()::PERMISSION()[$permission]);
 		}
 
 		public static function getPermissionValue($permission) {
-			return self::PERMISSION()[$permission];
+			return get_called_class()::PERMISSION()[$permission];
 		}
 
 		public function can($permission) {

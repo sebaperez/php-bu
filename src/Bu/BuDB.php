@@ -122,13 +122,37 @@ class BuDB extends Bu
         return false;
     }
 
+    public static function executeQuery($query, $querySymbols, $queryValues) {
+	$conex = self::getConex();
+	if ($conex) {
+		$st = $conex->prepare($query);
+		if ($st) {
+			$st->bind_param($querySymbols, ...$queryValues);
+			if ($st->execute()) {
+				$result = $st->get_result();
+				$r = [];
+				while ($data = $result->fetch_assoc()) {
+					array_push($r, $data);
+				}
+				return $r;
+			}
+		}
+	} else {
+		throw new \Bu\Exception\DBStatementError($conex->error);
+	}
+    }
+
     public static function find($class, $condition, $queryValues)
     {
         $fieldNames = $class::getPK();
         $parsedFields = implode(",", $fieldNames);
         $table = $class::getTable();
 
-        $query = "select $parsedFields from $table where $condition";
+        $query = "select $parsedFields from $table where";
+	if ($class::hasEndDate()) {
+		$query .= " end_date is null and";
+	}
+	$query .= " $condition";
         $querySymbols = [];
         $parsedValues = [];
 

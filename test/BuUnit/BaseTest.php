@@ -135,6 +135,12 @@ class BaseTest extends \Bu\Test\BuTest
         $this->assertEquals($NAME, $sampleobject->getValue("name"));
     }
 
+    public function test_add_double_value() {
+	$VALUE = 123.45;
+	$double = \Bu\Test\Sample\SampleClassDouble::add([ "value" => $VALUE ]);
+	$this->assertEquals($double->getValue("value"), $VALUE);
+    }
+
     public function test_add_composed_pk()
     {
         $NAME = $this->getRandomString();
@@ -245,6 +251,30 @@ class BaseTest extends \Bu\Test\BuTest
             }
         }
         $this->assertTrue($flag);
+    }
+
+    public function test_find_with_order_and_limit() {
+        $NAME1 = "1test";
+        $sampleobject1 = $this->getNew("SampleClass", [ "name" => $NAME1 ]);
+        $NAME2 = "2test";
+        $sampleobject2 = $this->getNew("SampleClass", [ "name" => $NAME2 ]);
+        $objects = \Bu\Test\Sample\SampleClass::find("sampleclass_id >= ?", ["sampleclass_id" => $sampleobject1->getValue("sampleclass_id")]);
+        $this->assertCount(2, $objects);
+	$objects = \Bu\Test\Sample\SampleClass::find("sampleclass_id >= ? order by name desc", ["sampleclass_id" => $sampleobject1->getValue("sampleclass_id")]);
+        $this->assertCount(2, $objects);
+	$this->assertEquals($NAME2, $objects[0]->getValue("name"));
+	$this->assertEquals($NAME1, $objects[1]->getValue("name"));
+        $objects = \Bu\Test\Sample\SampleClass::find("sampleclass_id >= ? order by name asc limit 1", ["sampleclass_id" => $sampleobject1->getValue("sampleclass_id")]);
+        $this->assertCount(1, $objects);
+        $this->assertEquals($NAME1, $objects[0]->getValue("name"));
+        $objects = \Bu\Test\Sample\SampleClass::find("sampleclass_id >= ? order by name desc limit 1", ["sampleclass_id" => $sampleobject1->getValue("sampleclass_id")]);
+        $this->assertCount(1, $objects);
+        $this->assertEquals($NAME2, $objects[0]->getValue("name"));
+
+	$values = \Bu\Test\Sample\SampleClass::executeQuery("select * from sampleclass where sampleclass_id >= ?", "i", [ $sampleobject1->getValue("sampleclass_id") ]);
+	$this->assertCount(2, $values);
+	$this->assertEquals($NAME1, $values[0]["name"]);
+	$this->assertEquals($NAME2, $values[1]["name"]);
     }
 
     public function test_find_exclude_end_date()
