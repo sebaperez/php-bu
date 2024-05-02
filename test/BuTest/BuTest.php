@@ -4,7 +4,7 @@
 
     use PHPUnit\Framework\TestCase;
 
-    class BuTest extends TestCase
+    abstract class BuTest extends TestCase
     {
         use \Bu\Test\Factory;
 
