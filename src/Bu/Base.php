@@ -76,6 +76,9 @@
         {
             return 2;
         }
+	public static function ATTR_LOADABLE_IF_DELETED() {
+	    return 3;
+	}
 
         public static function getDef()
         {
@@ -198,6 +201,10 @@
             return in_array(self::ATTR_WITH_END_DATE(), self::getAttr());
         }
 
+	public static function isLoadableIfDeleted() {
+	    return in_array(self::ATTR_LOADABLE_IF_DELETED(), self::getAttr());
+	}
+
         public static function isFieldMandatory($fieldName)
         {
             $field = self::getField($fieldName);
@@ -303,6 +310,10 @@
 		return BuDB::executeQuery($query, $querySymbols, $queryValues);
 	}
 
+	public static function hasSimpleLoad() {
+		return isset($GLOBALS["SIMPLE_LOAD"]) && $GLOBALS["SIMPLE_LOAD"];
+	}
+
         public static function find($condition = null, $queryValues = null)
         {
             if (! $condition) {
@@ -311,12 +322,22 @@
 
             $class = get_called_class();
             $objects = [];
-            $ids = BuDB::find($class, $condition, $queryValues);
-            if ($ids) {
-                foreach ($ids as $id) {
-                    array_push($objects, $class::get($id));
-                }
-            }
+	    if (self::hasSimpleLoad()) {
+	           $dataValues = BuDB::find($class, $condition, $queryValues);
+		   if ($dataValues) {
+			foreach ($dataValues as $dataValue) {
+				$object = new $class([ "values" => $dataValue ]);
+				array_push($objects, $object);
+			}
+		   }
+	    } else {
+         	   $ids = BuDB::find($class, $condition, $queryValues);
+		   if ($ids) {
+               	  	 foreach ($ids as $id) {
+                   		array_push($objects, $class::get($id));
+                   	}
+                   }
+	    }
             return $objects;
         }
 

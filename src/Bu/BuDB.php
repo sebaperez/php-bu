@@ -102,7 +102,7 @@ class BuDB extends Bu
             array_push($querySymbols, $symbol);
             array_push($parsedValues, $pkValue);
         }
-        if ($class::hasEndDate()) {
+        if ($class::hasEndDate() && ! $class::isLoadableIfDeleted()) {
             array_push($conditions, "end_date is null");
         }
         $query .= implode(" and ", $conditions);
@@ -142,14 +142,22 @@ class BuDB extends Bu
 	}
     }
 
+    public static function hasSimpleLoad() {
+	return \Bu\Base::hasSimpleLoad();
+    }
+
     public static function find($class, $condition, $queryValues)
     {
-        $fieldNames = $class::getPK();
+	if (self::hasSimpleLoad()) {
+		$fieldNames = $class::getFieldNames();
+	} else {
+		$fieldNames = $class::getPK();
+	}
         $parsedFields = implode(",", $fieldNames);
         $table = $class::getTable();
 
         $query = "select $parsedFields from $table where";
-	if ($class::hasEndDate()) {
+	if ($class::hasEndDate() && ! $class::isLoadableIfDeleted()) {
 		$query .= " end_date is null and";
 	}
 	$query .= " $condition";
@@ -175,7 +183,9 @@ class BuDB extends Bu
                     $result = $st->get_result();
                     $r = [];
                     while ($data = $result->fetch_assoc()) {
-                        if ($class::hasSinglePK()) {
+			if (self::hasSimpleLoad()) {
+			    $id = $data;
+			} else if ($class::hasSinglePK()) {
                             $id = $data[$class::getPK()[0]];
                         } else {
                             $id = $data;
@@ -210,7 +220,7 @@ class BuDB extends Bu
             array_push($querySymbols, $symbol);
             array_push($parsedValues, $value);
         }
-        if ($class::hasEndDate()) {
+        if ($class::hasEndDate() && ! $class::isLoadableIfDeleted()) {
             array_push($conditions, "end_date is null");
         }
         $query .= implode(" and ", $conditions);

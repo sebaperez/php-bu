@@ -22,6 +22,12 @@
                     ],
                     "key" => [ "sampleclass_id" ]
                 ],
+		"\Bu\Test\Sample\SampleClassDeleted" => [
+		    "values" => [
+			"name" => $this->getRandomString()
+		    ],
+		    "key" => [ "sampleclass_id" ]
+		],
                 "\Bu\Test\Sample\SampleClassMultiplePK" => [
                     "values" => [
                         "name" => $this->getRandomString()
