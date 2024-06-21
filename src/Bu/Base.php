@@ -380,7 +380,9 @@
             }
             $ids = BuDB::addNewObject($class, $values);
 
-            if ($ids) {
+            if (self::isStatic()) {
+		return $class::get($values[self::getPK()[0]]);
+            } else if ($ids) {
                 return $class::get($ids);
             } else {
                 throw new \Bu\Exception\ErrorOnAdd();
