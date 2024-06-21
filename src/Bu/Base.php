@@ -68,17 +68,19 @@
 
         // Class attributes
 
-        public static function ATTR_WITH_START_DATE()
-        {
+        public static function ATTR_WITH_START_DATE() {
             return 1;
         }
-        public static function ATTR_WITH_END_DATE()
-        {
+        public static function ATTR_WITH_END_DATE() {
             return 2;
         }
 	public static function ATTR_LOADABLE_IF_DELETED() {
 	    return 3;
 	}
+	public static function ATTR_IS_STATIC() {
+            return 4;
+	}
+
 
         public static function getDef()
         {
@@ -189,6 +191,10 @@
         public static function getAttr()
         {
             return self::getDef()["attr"];
+        }
+
+        public static function isStatic() {
+           return in_array(self::ATTR_IS_STATIC(), self::getAttr());
         }
 
         public static function hasStartDate()

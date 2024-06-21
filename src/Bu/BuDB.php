@@ -122,6 +122,16 @@ class BuDB extends Bu
         return false;
     }
 
+	public static function truncate($table) {
+		$conex = self::getConex();
+		if ($conex) { 
+			$st = $conex->prepare("truncate table $table");
+			return $st->execute();
+		} else {
+			throw new \Bu\Exception\DBStatementError($conex->error);
+		}
+	}
+
     public static function executeQuery($query, $querySymbols, $queryValues) {
 	$conex = self::getConex();
 	if ($conex) {
