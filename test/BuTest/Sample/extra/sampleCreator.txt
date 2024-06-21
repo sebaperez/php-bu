@@ -1,0 +1,9 @@
+user
+- user_id	int auto_increment	pk
+- account_id	int	fk:account
+- name	varchar(50)	pk
+- lastname	varchar(50)
+
+account
+- account_id	int auto_increment	pk
+- name	varchar(50)
