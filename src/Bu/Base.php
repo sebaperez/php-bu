@@ -370,7 +370,7 @@
         {
             if (! $values) {
                 throw new \Bu\Exception\InvalidArgument("values not defined for Bu::add");
-            } elseif (self::hasSinglePK() && in_array(self::getPK()[0], array_keys($values))) {
+            } elseif (self::hasSinglePK() && in_array(self::getPK()[0], array_keys($values)) && ! self::isStatic()) {
                 throw new \Bu\Exception\InvalidArgument("PK cannot be set in Bu::add");
             }
 
