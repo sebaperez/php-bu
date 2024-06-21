@@ -26,7 +26,7 @@
 		}
 
 		public function getTableData($table) {
-			$content = file_get_contents($table);
+			$content = file_get_contents($this->getDirectory() . "/" . $table);
 			if ($content) {
 				return json_decode($content, true);
 			}
