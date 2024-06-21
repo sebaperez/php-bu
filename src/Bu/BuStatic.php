@@ -41,7 +41,7 @@
 
 			foreach ($tables as $class => $table) {
 				if ($class::isStatic()) {
-					$this->clearTable($table);
+					$this->clearTable($class::getTable());
 					$data = $this->getTableData($table);
 					foreach ($data as $row) {
 						$class::add($row);
