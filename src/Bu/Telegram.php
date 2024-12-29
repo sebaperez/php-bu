@@ -5,6 +5,10 @@
     class Telegram extends Bu
     {
 
+			public $rawJson;
+			public $json;
+			public $response;
+
 			public static function TELEGRAM_ATTR_NO_LOGIN_REQUIRED() { return "TELEGRAM_ATTR_NO_LOGIN_REQUIRED"; }
 
 			public function __construct($rawJson) {

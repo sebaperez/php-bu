@@ -4,6 +4,13 @@
 
 	class API extends Bu {
 
+		public $method;
+		public $parameters;
+		public $session;
+		public $user;
+		public $error;
+		public $ok;
+
 		public static function API_ERROR_INVALID_METHOD() { return "ERROR_INVALID_METHOD"; }
 		public static function API_ERROR_FORBIDDEN() { return "API_ERROR_FORBIDDEN"; }
 		public static function API_ERROR_MANDATORY_PARAMS_MISSING() { return "API_ERROR_MANDATORY_PARAMS_MISSING"; }
