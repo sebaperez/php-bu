@@ -350,7 +350,7 @@
         public static function findFirst($condition = null, $queryValues = null)
         {
             $objects = self::find($condition, $queryValues);
-            if (count($objects) === 1) {
+            if (count($objects) > 0) {
                 return $objects[0];
             }
             return null;
