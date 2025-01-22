@@ -391,7 +391,7 @@
 
         public function update($field = null, $value = null)
         {
-            if (! $field || ($value === false) || ($value === null)) {
+            if (! $field) {
                 throw new \Bu\Exception\InvalidArgument("values not defined for Bu::update");
             } elseif (! self::isField($field)) {
                 throw new \Bu\Exception\InvalidArgument("field $field does not exist for Bu::update");
