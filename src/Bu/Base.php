@@ -287,6 +287,10 @@
             }
         }
 
+	public static function getDBClass() {
+		return isset($GLOBALS["DBCLASS"]) ? "\Bu\\" . $GLOBALS["DBCLASS"] : "\Bu\BuDB";
+	}
+
         public static function get($ids = null)
         {
             if (! $ids) {
@@ -303,7 +307,8 @@
             if (self::hasSinglePK()) {
                 $ids = [ self::getPK()[0] => $ids ];
             }
-            $values = BuDB::getValuesSingleObject($class, $ids);
+	    $dbclass = self::getDBClass();
+            $values = $dbclass::getValuesSingleObject($class, $ids);
 
             if ($values) {
                 return new $class([ "values" => $values ]);
@@ -313,7 +318,8 @@
         }
 
 	public static function executeQuery($query, $querySymbols, $queryValues) {
-		return BuDB::executeQuery($query, $querySymbols, $queryValues);
+		$dbclass = self::getDBClass();
+		return $dbclass::executeQuery($query, $querySymbols, $queryValues);
 	}
 
 	public static function hasSimpleLoad() {
@@ -328,8 +334,9 @@
 
             $class = get_called_class();
             $objects = [];
+	    $dbclass = self::getDBClass();
 	    if (self::hasSimpleLoad()) {
-	           $dataValues = BuDB::find($class, $condition, $queryValues);
+	           $dataValues = $dbclass::find($class, $condition, $queryValues);
 		   if ($dataValues) {
 			foreach ($dataValues as $dataValue) {
 				$object = new $class([ "values" => $dataValue ]);
@@ -337,7 +344,7 @@
 			}
 		   }
 	    } else {
-         	   $ids = BuDB::find($class, $condition, $queryValues);
+         	   $ids = $dbclass::find($class, $condition, $queryValues);
 		   if ($ids) {
                	  	 foreach ($ids as $id) {
                    		array_push($objects, $class::get($id));
@@ -350,7 +357,7 @@
         public static function findFirst($condition = null, $queryValues = null)
         {
             $objects = self::find($condition, $queryValues);
-            if (count($objects) === 1) {
+            if (count($objects) > 0) {
                 return $objects[0];
             }
             return null;
@@ -378,7 +385,8 @@
             if (self::hasStartDate()) {
                 $values[self::STRING_FIELD_START_DATE()] = self::getTime();
             }
-            $ids = BuDB::addNewObject($class, $values);
+	    $dbclass = self::getDBClass();
+            $ids = $dbclass::addNewObject($class, $values);
 
             if (self::isStatic()) {
 		return $class::get($values[self::getPK()[0]]);
@@ -404,7 +412,8 @@
                 $ids[$pk] = $this->getValue($pk);
             }
 
-            $result = BuDB::update($class, $ids, $field, $value);
+	    $dbclass = self::getDBClass();
+            $result = $dbclass::update($class, $ids, $field, $value);
             if ($result) {
                 return $this->_setValue($field, $value);
             }
