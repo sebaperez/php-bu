@@ -41,7 +41,8 @@ class BuDBSQLServer extends Bu
 		"PWD" => $pass
 	]);
         if (! $conex) {
-            throw new \Bu\Exception\DBConnectionError(sqlsrv_errors());
+	    $errors = sqlsrv_errors();
+            throw new \Bu\Exception\DBConnectionError((isset($errors) && isset($errors["message"]) ? $errors["message"] : "");
         }
         return $conex;
     }
