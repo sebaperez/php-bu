@@ -42,7 +42,7 @@ class BuDBSQLServer extends Bu
 	]);
         if (! $conex) {
 	    $errors = sqlsrv_errors();
-            throw new \Bu\Exception\DBConnectionError((isset($errors) && isset($errors["message"])) ? $errors["message"] : "");
+            throw new \Bu\Exception\DBConnectionError((isset($errors) && isset($errors[0]) && isset($errors[0]["message"])) ? $errors[0]["message"] : "");
         }
         return $conex;
     }
