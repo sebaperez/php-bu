@@ -23,9 +23,17 @@ class BuDBSQLServer extends Bu
     {
         return self::$PASS;
     }
-    public static function getDBname()
+    public static function getDefaultDBname()
     {
         return self::$DBNAME;
+    }
+
+    public static function getDBName($class = null) {
+	if ($class && $class::getSelfConfig()) {
+		return $class::getSelfConfigValue("DBNAME");
+	} else {
+		return isset($GLOBALS["DBNAME"]) ? $GLOBALS["DBNAME"] : self::getDefaultDBname();
+	}
     }
 
     private static function getConex($class = null)
@@ -34,13 +42,13 @@ class BuDBSQLServer extends Bu
 		$host = $class::getSelfConfigValue("DBHOST");
 		$user = $class::getSelfConfigValue("DBUSER");
 		$pass = $class::getSelfConfigValue("DBPASS");
-		$dbname = $class::getSelfConfigValue("DBNAME");
 	} else {
 		$host = isset($GLOBALS["DBHOST"]) ? $GLOBALS["DBHOST"] : self::getDBHost();
 		$user = isset($GLOBALS["DBUSER"]) ? $GLOBALS["DBUSER"] : self::getDBUser();
 		$pass = isset($GLOBALS["DBPASS"]) ? $GLOBALS["DBPASS"] : self::getDBPass();
-		$dbname = isset($GLOBALS["DBNAME"]) ? $GLOBALS["DBNAME"] : self::getDBname();
 	}
+
+	$dbname = self::getDBName($class);
 
 	$conex = sqlsrv_connect($host, [
 		"Database" => $dbname,
@@ -178,7 +186,7 @@ class BuDBSQLServer extends Bu
         $parsedFields = implode(",", $fieldNames);
         $table = $class::getTable();
 
-        $query = "select $parsedFields from " . "Epsilon_0009." . "$table where";
+        $query = "select $parsedFields from " . self::getDBName($class) . "." . "$table where";
 	if ($class::hasEndDate() && ! $class::isLoadableIfDeleted()) {
 		$query .= " " . $class::STRING_FIELD_END_DATE() . " is null and";
 	}

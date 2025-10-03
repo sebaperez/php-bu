@@ -23,24 +23,32 @@ class BuDB extends Bu
     {
         return self::$PASS;
     }
-    public static function getDBname()
+    public static function getDefaultDBname()
     {
         return self::$DBNAME;
     }
 
+    public static function getDBName($class = null) {
+	if ($class && $class::getSelfConfig()) {
+		return $class::getSelfConfigValue("DBNAME");
+	} else {
+		return isset($GLOBALS["DBNAME"]) ? $GLOBALS["DBNAME"] : self::getDefaultDBname();
+	}
+    }
+
     private static function getConex($class = null)
     {
-		if ($class && $class::getSelfConfig()) {
-			$host = $class::getSelfConfigValue("DBHOST");
-			$user = $class::getSelfConfigValue("DBUSER");
-			$pass = $class::getSelfConfigValue("DBPASS");
-			$dbname = $class::getSelfConfigValue("DBNAME");
-		} else {
-			$host = isset($GLOBALS["DBHOST"]) ? $GLOBALS["DBHOST"] : self::getDBHost();
-			$user = isset($GLOBALS["DBUSER"]) ? $GLOBALS["DBUSER"] : self::getDBUser();
-			$pass = isset($GLOBALS["DBPASS"]) ? $GLOBALS["DBPASS"] : self::getDBPass();
-			$dbname = isset($GLOBALS["DBNAME"]) ? $GLOBALS["DBNAME"] : self::getDBname();
-		}
+	if ($class && $class::getSelfConfig()) {
+		$host = $class::getSelfConfigValue("DBHOST");
+		$user = $class::getSelfConfigValue("DBUSER");
+		$pass = $class::getSelfConfigValue("DBPASS");
+	} else {
+		$host = isset($GLOBALS["DBHOST"]) ? $GLOBALS["DBHOST"] : self::getDBHost();
+		$user = isset($GLOBALS["DBUSER"]) ? $GLOBALS["DBUSER"] : self::getDBUser();
+		$pass = isset($GLOBALS["DBPASS"]) ? $GLOBALS["DBPASS"] : self::getDBPass();
+	}
+
+	$dbname = self::getDBName($class);
 
         $conex = new \mysqli($host, $user, $pass, $dbname);
         if ($conex->connect_error) {
