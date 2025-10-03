@@ -29,13 +29,30 @@
 	    return 4;
 	}
 
+	public static function getCustomFields() {
+		return isset(self::getDef()["customFields"]) ? self::getDef()["customFields"] : null;
+	}
+
+	public static function getCustomFieldValue($field) {
+		$customFields = self::getCustomFields();
+		if ($customFields && $customFields[$field]) {
+			return $customFields[$field];
+		}
+	}
+
         public static function STRING_FIELD_START_DATE()
         {
-            return "start_date";
+		if (self::getCustomFieldValue("start_date")) {
+			return self::getCustomFieldValue("start_date");
+		}
+		return "start_date";
         }
         public static function STRING_FIELD_END_DATE()
         {
-            return "end_date";
+		if (self::getCustomFieldValue("end_date")) {
+			return self::getCustomFieldValue("end_date");
+		}
+		return "end_date";
         }
 
         public static function SYMBOLS_BY_TYPE()
@@ -287,7 +304,21 @@
             }
         }
 
+	public static function getSelfConfig() {
+		return isset(self::getDef()["config"]) ? self::getDef()["config"] : null;
+	}
+
+	public static function getSelfConfigValue($value) {
+		$config = self::getSelfConfig();
+		if ($config && $config[$value]) {
+			return $config[$value];
+		}
+	}
+
 	public static function getDBClass() {
+		if (self::getSelfConfigValue("DBCLASS")) {
+			return self::getSelfConfigValue("DBCLASS");
+		}
 		return isset($GLOBALS["DBCLASS"]) ? "\Bu\\" . $GLOBALS["DBCLASS"] : "\Bu\BuDB";
 	}
 

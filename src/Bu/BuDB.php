@@ -28,12 +28,19 @@ class BuDB extends Bu
         return self::$DBNAME;
     }
 
-    private static function getConex()
+    private static function getConex($class = null)
     {
-				$host = isset($GLOBALS["DBHOST"]) ? $GLOBALS["DBHOST"] : self::getDBHost();
-				$user = isset($GLOBALS["DBUSER"]) ? $GLOBALS["DBUSER"] : self::getDBUser();
-				$pass = isset($GLOBALS["DBPASS"]) ? $GLOBALS["DBPASS"] : self::getDBPass();
-				$dbname = isset($GLOBALS["DBNAME"]) ? $GLOBALS["DBNAME"] : self::getDBname();
+		if ($class && $class::getSelfConfig()) {
+			$host = $class::getSelfConfigValue("DBHOST");
+			$user = $class::getSelfConfigValue("DBUSER");
+			$pass = $class::getSelfConfigValue("DBPASS");
+			$dbname = $class::getSelfConfigValue("DBNAME");
+		} else {
+			$host = isset($GLOBALS["DBHOST"]) ? $GLOBALS["DBHOST"] : self::getDBHost();
+			$user = isset($GLOBALS["DBUSER"]) ? $GLOBALS["DBUSER"] : self::getDBUser();
+			$pass = isset($GLOBALS["DBPASS"]) ? $GLOBALS["DBPASS"] : self::getDBPass();
+			$dbname = isset($GLOBALS["DBNAME"]) ? $GLOBALS["DBNAME"] : self::getDBname();
+		}
 
         $conex = new \mysqli($host, $user, $pass, $dbname);
         if ($conex->connect_error) {
@@ -56,7 +63,7 @@ class BuDB extends Bu
             array_push($querySymbols, $symbol);
         }
 
-        $conex = self::getConex();
+        $conex = self::getConex($class);
         if ($conex) {
             $st = $conex->prepare($query);
             if ($st) {
@@ -103,10 +110,10 @@ class BuDB extends Bu
             array_push($parsedValues, $pkValue);
         }
         if ($class::hasEndDate() && ! $class::isLoadableIfDeleted()) {
-            array_push($conditions, "end_date is null");
+            array_push($conditions, $class::STRING_FIELD_END_DATE() . " is null");
         }
         $query .= implode(" and ", $conditions);
-        $conex = self::getConex();
+        $conex = self::getConex($class);
         if ($conex) {
             $st = $conex->prepare($query);
             if ($st) {
@@ -132,8 +139,8 @@ class BuDB extends Bu
 		}
 	}
 
-    public static function executeQuery($query, $querySymbols, $queryValues) {
-	$conex = self::getConex();
+    public static function executeQuery($query, $querySymbols, $queryValues, $class = null) {
+	$conex = self::getConex($class);
 	if ($conex) {
 		$st = $conex->prepare($query);
 		if ($st) {
@@ -168,7 +175,7 @@ class BuDB extends Bu
 
         $query = "select $parsedFields from $table where";
 	if ($class::hasEndDate() && ! $class::isLoadableIfDeleted()) {
-		$query .= " end_date is null and";
+		$query .= " " . $class::STRING_FIELD_END_DATE() . " is null and";
 	}
 	$query .= " $condition";
         $querySymbols = [];
@@ -182,7 +189,7 @@ class BuDB extends Bu
             }
         }
 
-        $conex = self::getConex();
+        $conex = self::getConex($class);
         if ($conex) {
             $st = $conex->prepare($query);
             if ($st) {
@@ -231,11 +238,11 @@ class BuDB extends Bu
             array_push($parsedValues, $value);
         }
         if ($class::hasEndDate() && ! $class::isLoadableIfDeleted()) {
-            array_push($conditions, "end_date is null");
+            array_push($conditions, $class::STRING_FIELD_END_DATE() . " is null");
         }
         $query .= implode(" and ", $conditions);
 
-        $conex = self::getConex();
+        $conex = self::getConex($class);
         if ($conex) {
             $st = $conex->prepare($query);
             if ($st) {

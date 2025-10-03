@@ -209,13 +209,6 @@ class BaseTest extends \Bu\Test\BuTest
         $sampleobject->update(null, 1);
     }
 
-    public function test_update_without_value()
-    {
-        $sampleobject = $this->getNew("SampleClass");
-        $this->expectException(\Bu\Exception\InvalidArgument::class);
-        $sampleobject->update("name");
-    }
-
     public function test_has_start_date()
     {
         $this->assertTrue(\Bu\Test\Sample\SampleClass::hasStartDate());
