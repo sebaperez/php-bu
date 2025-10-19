@@ -233,7 +233,7 @@ class BuDBSQLServer extends Bu
         $table = $class::getTable();
         $pks = $class::getPK();
 
-        $query = "select $parsedFields from $table where ";
+        $query = "select $parsedFields from " . self::getDBName($class) . "." . "$table where ";
         $conditions = [];
         $parsedValues = [];
         $querySymbols = [];
@@ -253,14 +253,11 @@ class BuDBSQLServer extends Bu
 
         $conex = self::getConex($class);
         if ($conex) {
-            $st = $conex->prepare($query);
+            $st = sqlsrv_prepare($conex, $query, $parsedValues);
             if ($st) {
-                $st->bind_param(implode("", $querySymbols), ...$parsedValues);
-                if ($st->execute()) {
-                    $result = $st->get_result();
-                    if ($result->num_rows === 1) {
-                        return $result->fetch_assoc();
-                    }
+                if (sqlsrv_execute($st)) {
+                    $data = sqlsrv_fetch_array($st, SQLSRV_FETCH_ASSOC);
+                    return $data;
                 }
             } else {
                 throw new \Bu\Exception\DBStatementError($conex->error);
