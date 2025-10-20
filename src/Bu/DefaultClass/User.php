@@ -63,7 +63,9 @@ class User extends \Bu\Base
 
     public static function add($values = null)
     {
-        $values["password"] = self::encrypt($values["password"]);
+	if (isset($values["password"])) {
+       		$values["password"] = self::encrypt($values["password"]);
+	}
         return parent::add($values);
     }
 
