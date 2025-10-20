@@ -28,11 +28,24 @@ class BuDBSQLServer extends Bu
         return self::$DBNAME;
     }
 
+    public static function getFullSchema($class = null) {
+	$dbName = self::getDBName($class);
+	$schema = self::getSchema($class);
+
+	return $dbName . ($schema ? "." . $schema : "");
+    }
+
     public static function getDBName($class = null) {
 	if ($class && $class::getSelfConfig()) {
 		return $class::getSelfConfigValue("DBNAME");
 	} else {
 		return isset($GLOBALS["DBNAME"]) ? $GLOBALS["DBNAME"] : self::getDefaultDBname();
+	}
+    }
+
+    public static function getSchema($class = null) {
+	if ($class && $class::getSelfConfig() && $class::getSelfConfigValue("SCHEMA")) {
+		return $class::getSelfConfigValue("SCHEMA");
 	}
     }
 
@@ -186,7 +199,7 @@ class BuDBSQLServer extends Bu
         $parsedFields = implode(",", $fieldNames);
         $table = $class::getTable();
 
-        $query = "select $parsedFields from " . self::getDBName($class) . "." . "$table where";
+        $query = "select $parsedFields from " . self::getFullSchema($class) . "." . "$table where";
 	if ($class::hasEndDate() && ! $class::isLoadableIfDeleted()) {
 		$query .= " " . $class::STRING_FIELD_END_DATE() . " is null and";
 	}
@@ -233,7 +246,7 @@ class BuDBSQLServer extends Bu
         $table = $class::getTable();
         $pks = $class::getPK();
 
-        $query = "select $parsedFields from " . self::getDBName($class) . "." . "$table where ";
+        $query = "select $parsedFields from " . self::getFullSchema($class) . "." . "$table where ";
         $conditions = [];
         $parsedValues = [];
         $querySymbols = [];
