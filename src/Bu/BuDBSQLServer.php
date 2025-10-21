@@ -78,25 +78,25 @@ class BuDBSQLServer extends Bu
     public static function addNewObject($class, $values)
     {
         $table = $class::getTable();
-        $query = "insert into $table (" . implode(",", array_keys($values)) . ") values (" . implode(",", array_fill(0, count(array_keys($values)), "?")) . ")";
+        $query = "insert into " . self::getFullSchema($class) . "." . "$table (" . implode(",", array_keys($values)) . ") values (" . implode(",", array_fill(0, count(array_keys($values)), "?")) . ")";
 
         $parsedValues = [];
-        $querySymbols = [];
 
         foreach ($values as $key => $value) {
             $symbol = $class::getFieldSymbol($key);
             array_push($parsedValues, $value);
-            array_push($querySymbols, $symbol);
         }
 
         $conex = self::getConex($class);
         if ($conex) {
-            $st = $conex->prepare($query);
+	    $query .= "; SELECT SCOPE_IDENTITY()";
+	    $st = sqlsrv_prepare($conex, $query, $parsedValues);
             if ($st) {
-                $st->bind_param(implode("", $querySymbols), ...$parsedValues);
-                if ($st->execute()) {
+                if (sqlsrv_execute($st)) {
                     if ($class::hasSinglePK()) {
-                        return $conex->insert_id;
+			sqlsrv_next_result($st);
+			sqlsrv_fetch($st);
+			return sqlsrv_get_field($st, 0);
                     } else {
                         $pks = $class::getPK();
                         $r = [];
@@ -105,16 +105,11 @@ class BuDBSQLServer extends Bu
                         }
                         return $r;
                     }
-
-                    $result = $st->get_result();
-                    if ($result->num_rows === 1) {
-                        return $result->fetch_assoc();
-                    }
                 } else {
-                    throw new \Bu\Exception\DBStatementError($st->error);
+                    throw new \Bu\Exception\DBStatementError(json_encode(sqlsrv_errors()));
                 }
             } else {
-                throw new \Bu\Exception\DBStatementError($conex->error);
+                throw new \Bu\Exception\DBStatementError(json_encode(sqlsrv_errors()));
             }
         }
         return false;
@@ -124,15 +119,13 @@ class BuDBSQLServer extends Bu
     {
         $table = $class::getTable();
 
-        $query = "update $table set $field = ? where ";
+        $query = "update " . self::getFullSchema($class) . "." . "$table set $field = ? where ";
         $conditions = [];
         $parsedValues = [$value];
-        $querySymbols = [$class::getFieldSymbol($field)];
 
         foreach ($ids as $pk => $pkValue) {
             array_push($conditions, "$pk = ?");
             $symbol = $class::getFieldSymbol($pk);
-            array_push($querySymbols, $symbol);
             array_push($parsedValues, $pkValue);
         }
         if ($class::hasEndDate() && ! $class::isLoadableIfDeleted()) {
@@ -141,14 +134,13 @@ class BuDBSQLServer extends Bu
         $query .= implode(" and ", $conditions);
         $conex = self::getConex($class);
         if ($conex) {
-            $st = $conex->prepare($query);
+	    $st = sqlsrv_prepare($conex, $query, $parsedValues);
             if ($st) {
-                $st->bind_param(implode("", $querySymbols), ...$parsedValues);
-                if ($st->execute()) {
-                    return ($st->affected_rows === 1);
+                if (sqlsrv_execute($st)) {
+                    return true;
                 }
             } else {
-                throw new \Bu\Exception\DBStatementError($conex->error);
+                throw new \Bu\Exception\DBStatementError(json_encode(sqlsrv_errors()));
             }
         }
 
@@ -158,30 +150,29 @@ class BuDBSQLServer extends Bu
 	public static function truncate($table) {
 		$conex = self::getConex();
 		if ($conex) { 
-			$st = $conex->prepare("truncate table $table");
+			$st = $conex->prepare("truncate table " . self::getFullSchema($class) . "." . $table);
 			return $st->execute();
 		} else {
-			throw new \Bu\Exception\DBStatementError($conex->error);
+			throw new \Bu\Exception\DBStatementError(json_encode(sqlsrv_errors()));
 		}
 	}
 
-    public static function executeQuery($query, $querySymbols, $queryValues, $class = null) {
+    public static function executeQuery($query, $queryValues, $class = null) {
 	$conex = self::getConex($class);
 	if ($conex) {
-		$st = $conex->prepare($query);
+		$st = sqlsrv_prepare($conex, $query, $queryValues);
 		if ($st) {
-			$st->bind_param($querySymbols, ...$queryValues);
-			if ($st->execute()) {
+			if (sqlsrv_execute($st)) {
 				$result = $st->get_result();
 				$r = [];
-				while ($data = $result->fetch_assoc()) {
+				while ($data = sqlsrv_fetch_array($st, SQLSRV_FETCH_ASSOC)) {
 					array_push($r, $data);
 				}
 				return $r;
 			}
 		}
 	} else {
-		throw new \Bu\Exception\DBStatementError($conex->error);
+		throw new \Bu\Exception\DBStatementError(json_encode(sqlsrv_errors()));
 	}
     }
 
@@ -234,7 +225,7 @@ class BuDBSQLServer extends Bu
                     return $r;
                 }
             } else {
-                throw new \Bu\Exception\DBStatementError($conex->error);
+                throw new \Bu\Exception\DBStatementError(json_encode(sqlsrv_errors()));
             }
         }
     }
@@ -273,7 +264,7 @@ class BuDBSQLServer extends Bu
                     return $data;
                 }
             } else {
-                throw new \Bu\Exception\DBStatementError($conex->error);
+                throw new \Bu\Exception\DBStatementError(json_encode(sqlsrv_errors()));
             }
         }
 
