@@ -160,10 +160,15 @@ class BuDBSQLServer extends Bu
     public static function executeQuery($query, $queryValues, $class = null) {
 	$conex = self::getConex($class);
 	if ($conex) {
-		$st = sqlsrv_prepare($conex, $query, $queryValues);
+		$parsedValues = [];
+		if ($queryValues) {
+			foreach ($queryValues as $fieldName => $value) {
+				array_push($parsedValues, $value);
+			}
+		}
+		$st = sqlsrv_prepare($conex, $query, $parsedValues);
 		if ($st) {
 			if (sqlsrv_execute($st)) {
-				$result = $st->get_result();
 				$r = [];
 				while ($data = sqlsrv_fetch_array($st, SQLSRV_FETCH_ASSOC)) {
 					array_push($r, $data);
