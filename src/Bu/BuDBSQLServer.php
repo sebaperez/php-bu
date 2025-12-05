@@ -157,7 +157,7 @@ class BuDBSQLServer extends Bu
 		}
 	}
 
-    public static function executeQuery($query, $queryValues, $class = null) {
+    public static function executeQuery($query, $querySymbols = null, $queryValues, $class = null) {
 	$conex = self::getConex($class);
 	if ($conex) {
 		$parsedValues = [];

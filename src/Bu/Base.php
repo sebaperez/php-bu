@@ -310,7 +310,7 @@
 
 	public static function getSelfConfigValue($value) {
 		$config = self::getSelfConfig();
-		if ($config && $config[$value]) {
+		if ($config && isset($config[$value]) && $config[$value]) {
 			return $config[$value];
 		}
 	}
