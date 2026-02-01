@@ -10,6 +10,7 @@ class BuDBSQLServer extends Bu
     private static $USER = "root";
     private static $PASS = "";
     private static $DBNAME = "base";
+    private static $conex = [];
 
     public static function getDBHost()
     {
@@ -63,6 +64,11 @@ class BuDBSQLServer extends Bu
 
 	$dbname = self::getDBName($class);
 
+	$string = md5($host . "_" . $user . "_" . $pass . "_" . $dbname);
+	if (isset(self::$conex[$string])) {
+		return self::$conex[$string];
+	}
+
 	$conex = sqlsrv_connect($host, [
 		"Database" => $dbname,
 		"UID" => $user,
@@ -72,6 +78,7 @@ class BuDBSQLServer extends Bu
 	    $errors = sqlsrv_errors();
             throw new \Bu\Exception\DBConnectionError((isset($errors) && isset($errors[0]) && isset($errors[0]["message"])) ? $errors[0]["message"] : "");
         }
+	self::$conex[$string] = $conex;
         return $conex;
     }
 
