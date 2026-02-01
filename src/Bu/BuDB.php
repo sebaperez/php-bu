@@ -10,6 +10,7 @@ class BuDB extends Bu
     private static $USER = "root";
     private static $PASS = "";
     private static $DBNAME = "base";
+    private static $conex = [];
 
     public static function getDBHost()
     {
@@ -50,10 +51,16 @@ class BuDB extends Bu
 
 	$dbname = self::getDBName($class);
 
+	$string = md5($host . "_" . $user . "_" . $pass . "_" . $dbname);
+	if (isset(self::$conex[$string])) {
+		return self::$conex[$string];
+	}
+
         $conex = new \mysqli($host, $user, $pass, $dbname);
         if ($conex->connect_error) {
             throw new \Bu\Exception\DBConnectionError($conex->connect_error);
         }
+	self::$conex[$string] = $conex;
         return $conex;
     }
 
