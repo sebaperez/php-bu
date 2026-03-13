@@ -10,6 +10,7 @@
 		public $user;
 		public $error;
 		public $ok;
+		public $sessionObject;
 
 		public static function API_ERROR_INVALID_METHOD() { return "ERROR_INVALID_METHOD"; }
 		public static function API_ERROR_FORBIDDEN() { return "API_ERROR_FORBIDDEN"; }
@@ -34,6 +35,7 @@
 			if ($this->session) {
 				$session = get_called_class()::SESSION_CLASS()::getByHash($this->session);
 				if ($session) {
+					$this->sessionObject = $session;
 					$this->user = $session->getUser();
 				}
 			}
@@ -51,7 +53,7 @@
 		}
 
 		public function getSession() {
-			return get_called_class()::SESSION_CLASS()::getByHash($this->session);
+			return $this->sessionObject;
 		}
 
 		public function getMethods() {
