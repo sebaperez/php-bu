@@ -11,6 +11,8 @@ class BuDBSQLServer extends Bu
     private static $PASS = "";
     private static $DBNAME = "base";
     private static $conex = [];
+    private static $MAX_QUERIES_PER_CONNECTION = 2;
+    private static $conexNumQueries = [];
 
     public static function getDBHost()
     {
@@ -66,19 +68,24 @@ class BuDBSQLServer extends Bu
 
 	$string = md5($host . "_" . $user . "_" . $pass . "_" . $dbname);
 	if (isset(self::$conex[$string])) {
-		return self::$conex[$string];
+		if (self::$conexNumQueries[$string] < self::$MAX_QUERIES_PER_CONNECTION) {
+			self::$conexNumQueries[$string]++;
+			return self::$conex[$string];
+		}
 	}
 
 	$conex = sqlsrv_connect($host, [
 		"Database" => $dbname,
 		"UID" => $user,
-		"PWD" => $pass
+		"PWD" => $pass,
+		"MultipleActiveResultSets" => true
 	]);
         if (! $conex) {
 	    $errors = sqlsrv_errors();
             throw new \Bu\Exception\DBConnectionError((isset($errors) && isset($errors[0]) && isset($errors[0]["message"])) ? $errors[0]["message"] : "");
         }
 	self::$conex[$string] = $conex;
+	self::$conexNumQueries[$string] = 1;
         return $conex;
     }
 
@@ -180,6 +187,7 @@ class BuDBSQLServer extends Bu
 				while ($data = sqlsrv_fetch_array($st, SQLSRV_FETCH_ASSOC)) {
 					array_push($r, $data);
 				}
+				sqlsrv_free_stmt($st);
 				return $r;
 			}
 		}
@@ -234,6 +242,7 @@ class BuDBSQLServer extends Bu
                         }
                         array_push($r, $id);
                     }
+		    sqlsrv_free_stmt($st);
                     return $r;
                 }
             } else {
@@ -273,6 +282,7 @@ class BuDBSQLServer extends Bu
             if ($st) {
                 if (sqlsrv_execute($st)) {
                     $data = sqlsrv_fetch_array($st, SQLSRV_FETCH_ASSOC);
+		    sqlsrv_free_stmt($st);
                     return $data;
                 }
             } else {
