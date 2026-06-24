@@ -119,10 +119,6 @@ class BuDB extends Bu
     public static function update($class, $ids, $field, $value)
     {
 
-	if (self::hasSuperload()) {
-		throw new \Bu\Exception\InvalidArgument("update cannot be used within superload");
-	}
-
         $table = $class::getTable();
 
         $query = "update $table set $field = ? where ";
