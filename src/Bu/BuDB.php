@@ -87,7 +87,12 @@ class BuDB extends Bu
                 $st->bind_param(implode("", $querySymbols), ...$parsedValues);
                 if ($st->execute()) {
                     if ($class::hasSinglePK()) {
-                        return $conex->insert_id;
+                        $id = $conex->insert_id;
+			if (self::hasSuperload()) {
+				$values[$class::getPK()[0]] = $id;
+				self::addToSuperload($class, $id, $values);
+			}
+			return $id;
                     } else {
                         $pks = $class::getPK();
                         $r = [];
@@ -113,6 +118,11 @@ class BuDB extends Bu
 
     public static function update($class, $ids, $field, $value)
     {
+
+	if (self::hasSuperload()) {
+		throw new \Bu\Exception\InvalidArgument("update cannot be used within superload");
+	}
+
         $table = $class::getTable();
 
         $query = "update $table set $field = ? where ";
