@@ -357,6 +357,10 @@
 		return isset($GLOBALS["SIMPLE_LOAD"]) && $GLOBALS["SIMPLE_LOAD"];
 	}
 
+	public static function hasSuperload() {
+		return isset($GLOBALS["SUPERLOAD"]) && $GLOBALS["SUPERLOAD"];
+	}
+
         public static function find($condition = null, $queryValues = null)
         {
             if (! $condition) {

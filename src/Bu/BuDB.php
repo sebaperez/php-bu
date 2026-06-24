@@ -12,6 +12,8 @@ class BuDB extends Bu
     private static $DBNAME = "base";
     private static $conex = [];
 
+    private static $SUPERLOAD_CACHE = [];
+
     public static function getDBHost()
     {
         return self::$HOST;
@@ -178,6 +180,37 @@ class BuDB extends Bu
 	return \Bu\Base::hasSimpleLoad();
     }
 
+    public static function hasSuperload() {
+	return \Bu\Base::hasSuperload();
+    }
+
+    public static function getSuperloadCache() {
+	return self::$SUPERLOAD_CACHE;
+    }
+
+    public static function getSuperloadKey($class, $key) {
+	return $class . "___" . $key;
+    }
+
+    public static function addToSuperload($class, $key, $value) {
+	self::$SUPERLOAD_CACHE[self::getSuperloadKey($class, $key)] = $value;
+    }
+
+    public static function getFromSuperload($class, $key) {
+	if (isset(self::$SUPERLOAD_CACHE[self::getSuperloadKey($class, $key)])) {
+		return self::$SUPERLOAD_CACHE[self::getSuperloadKey($class, $key)];
+	}
+    }
+
+    public static function getSuperloadKeyValues($class, $data) {
+	$_keys = [];
+	$pks = $class::getPK();
+	foreach ($pks as $pk) {
+		array_push($_keys, $data[$pk]);
+	}
+	return implode("--", $_keys);
+    }
+
     public static function find($class, $condition, $queryValues)
     {
 	if (self::hasSimpleLoad()) {
@@ -223,6 +256,12 @@ class BuDB extends Bu
                             $id = $data;
                         }
                         array_push($r, $id);
+
+			if (self::hasSuperload()) {
+				$keys = self::getSuperloadKeyValues($class, $id);
+				self::addToSuperload($class, $keys, $id);
+			}
+
                     }
                     return $r;
                 }
@@ -234,6 +273,13 @@ class BuDB extends Bu
 
     public static function getValuesSingleObject($class, $ids)
     {
+	if (self::hasSuperload()) {
+		$values = self::getFromSuperload($class, implode("--", $ids));
+		if ($values) {
+			return $values;
+		}
+	}
+
         $fieldNames = $class::getFieldNames();
         $parsedFields = implode(",", $fieldNames);
         $table = $class::getTable();
@@ -265,7 +311,12 @@ class BuDB extends Bu
                 if ($st->execute()) {
                     $result = $st->get_result();
                     if ($result->num_rows === 1) {
-                        return $result->fetch_assoc();
+			$data = $result->fetch_assoc();
+			if (self::hasSuperload()) {
+				$keys = self::getSuperloadKeyValues($class, $data);
+				self::addToSuperload($class, $keys, $data);
+			}
+			return $data;
                     }
                 }
             } else {
